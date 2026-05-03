@@ -20,7 +20,7 @@ GitHub Search API でリポジトリ検索・詳細表示を行う Web アプリ
 
 ### 2.2 Single Source of Truth
 
-機能仕様 → `specs/` (EARS + Gherkin) / 意思決定 → `docs/adr/` / アプリケーション状態 → URL（`searchParams` 中心） / 型 → Zod スキーマからの推論。
+機能仕様 → `specs/` (EARS + Gherkin) / 意思決定 → GitHub Discussions（ADR カテゴリ） / アプリケーション状態 → URL（`searchParams` 中心） / 型 → Zod スキーマからの推論。
 
 ### 2.3 URL 駆動の真 SSR
 
@@ -40,7 +40,6 @@ Server Component をデフォルト、`"use client"` は必要箇所に最小限
 
 - 要件: `req-{nnn}-{domain}`（例: `req-001-search`）
 - Gherkin: `uc-{nnn}-{domain}`（例: `uc-001-search-success`）
-- ADR: `adr-{nnnn}-{title}`（例: `adr-0001-rendering-strategy`）
 
 ### 2.7 言語規約
 
@@ -86,8 +85,7 @@ Server Component をデフォルト、`"use client"` は必要箇所に最小限
 ├── tests/
 │   ├── e2e/                    # Playwright E2E テスト（*.spec.ts）
 │   └── integration/            # Vitest Integration テスト（*.test.tsx）
-├── docs/
-│   └── adr/                    # 意思決定
+├── docs/                       # ドキュメント（ADR は GitHub Discussions で管理）
 ├── specs/
 │   ├── ears/                   # EARS 要件定義（*.md）
 │   └── gherkin/                # Gherkin シナリオ（*.feature）
@@ -147,7 +145,7 @@ Feature: リポジトリ検索 (req-001-search)
 ```typescript
 /**
  * @file GitHub API クライアント
- * @see docs/adr/0003-libraries.md
+ * @see {@link https://github.com/[owner]/[repo]/discussions} ADR カテゴリ（GitHub Discussions）
  */
 
 /**
@@ -258,7 +256,7 @@ Static（広：ESLint + TypeScript）
 - [ ] JSDoc がすべての関数・型・コンポーネントに付与されている
 - [ ] ESLint / Prettier / TypeScript の警告・エラーがない
 - [ ] アクセシビリティ要件を満たしている（axe で検証）
-- [ ] 関連する ADR が存在する（必要な場合）
+- [ ] 関連する ADR が GitHub Discussions に投稿されている（必要な場合）
 
 ### プロジェクトの完了
 
@@ -271,19 +269,19 @@ Static（広：ESLint + TypeScript）
 
 ## 11. アンチパターン
 
-| アンチパターン                          | なぜダメか                         |
-| --------------------------------------- | ---------------------------------- |
-| 仕様を更新せずにコードを変更する        | Single Source of Truth が崩れる    |
-| ID が紐付かない実装                     | トレーサビリティが断絶する         |
-| API トークンをクライアント側で扱う      | セキュリティ事故の原因             |
-| `useState` でグローバル状態を管理       | URL 駆動の原則に反する             |
-| `dangerouslySetInnerHTML` を使う        | XSS の温床                         |
-| `any` 型を許容する                      | 型安全性が崩れる                   |
-| AI 生成コードを未レビューでコミット     | 意図しない挙動が紛れ込む           |
-| ADR を書かずにアーキテクチャ判断        | 「なぜ？」が後で誰にも答えられない |
-| JSDoc なしの関数                        | 意図と契約が読み取れない           |
-| `"use client"` を最上位に付ける         | バンドルサイズと SSR 効果を損なう  |
-| Unit Test を Integration の代わりに使う | Testing Trophy 思想に反する        |
+| アンチパターン                                       | なぜダメか                         |
+| ---------------------------------------------------- | ---------------------------------- |
+| 仕様を更新せずにコードを変更する                     | Single Source of Truth が崩れる    |
+| ID が紐付かない実装                                  | トレーサビリティが断絶する         |
+| API トークンをクライアント側で扱う                   | セキュリティ事故の原因             |
+| `useState` でグローバル状態を管理                    | URL 駆動の原則に反する             |
+| `dangerouslySetInnerHTML` を使う                     | XSS の温床                         |
+| `any` 型を許容する                                   | 型安全性が崩れる                   |
+| AI 生成コードを未レビューでコミット                  | 意図しない挙動が紛れ込む           |
+| ADR を GitHub Discussions に残さずアーキテクチャ判断 | 「なぜ？」が後で誰にも答えられない |
+| JSDoc なしの関数                                     | 意図と契約が読み取れない           |
+| `"use client"` を最上位に付ける                      | バンドルサイズと SSR 効果を損なう  |
+| Unit Test を Integration の代わりに使う              | Testing Trophy 思想に反する        |
 
 ---
 
