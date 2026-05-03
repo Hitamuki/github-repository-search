@@ -51,6 +51,7 @@
     "yzhang.markdown-all-in-one", // Markdown の見出し・プレビュー・ショートカット統合
     "takumii.markdowntable", // Markdown テーブルの自動整形
     "davidanson.vscode-markdownlint", // Markdown の文法 lint チェック
+    "alexkrechik.cucumberautocomplete", // Gherkin（.featureファイル）のサポート
     // ===================================================================
     // 【開発】ダイアグラム / Mermaid
     // アーキテクチャ図・フロー図を Markdown 内で描く
@@ -64,6 +65,6 @@
     // ===================================================================
     "vitest.explorer", // Vitest のテストをサイドバーから実行・管理
     "firsttris.vscode-jest-runner", // Jest テストをファイル・行単位でワンクリック実行
-    "ms-playwright.playwright", // Playwright E2E テストの実行・デバッグ・コード生成
+    "ms-playwright.playwright" // Playwright E2E テストの実行・デバッグ・コード生成
   ]
 }
