@@ -1,0 +1,69 @@
+{
+  "recommendations": [
+    // ===================================================================
+    // 【開発】エディタ基盤 / Editor Foundation
+    // コーディング体験の土台になる設定・表示系拡張
+    // ===================================================================
+    "EditorConfig.EditorConfig", // .editorconfig によるチーム間コードスタイル統一
+    "usernamehw.errorlens", // エラー・警告をインライン表示（気づきやすさ爆上がり）
+    "oderwat.indent-rainbow", // インデントを色分け（ネスト地獄でも迷子にならない）
+    "christian-kohler.path-intellisense", // ファイルパスの補完
+    // ===================================================================
+    // 【開発】Git / バージョン管理
+    // コード変更の追跡・レビュー・PR管理を強化する拡張群
+    // ===================================================================
+    "mhutchie.git-graph", // Git ブランチ構造をグラフィカルに可視化
+    "donjayamanne.githistory", // ファイル単位のコミット履歴を確認
+    "eamodio.gitlens", // 行レベルの blame・履歴・差分（Git 拡張の王様）
+    "GitHub.vscode-github-actions", // GitHub Actions ワークフローの編集・実行確認
+    "github.vscode-pull-request-github", // VS Code 内で PR レビュー・作成が完結
+    // ===================================================================
+    // 【開発】AI アシスタント
+    // コーディング・設計・レビューを AI がサポート
+    // ===================================================================
+    "anthropic.claude-code", // Claude による AI コーディングアシスタント
+    "google.geminicodeassist",
+    // ===================================================================
+    // 【開発】JavaScript / TypeScript
+    // JS/TS の型安全・補完・フォーマット・品質向上
+    // ===================================================================
+    "ms-vscode.vscode-typescript-next", // TypeScript の最新版（Nightly）を使用
+    "dbaeumer.vscode-eslint", // ESLint によるコード品質チェック
+    "esbenp.prettier-vscode", // Prettier による自動フォーマット
+    "christian-kohler.npm-intellisense", // import 時に npm パッケージ名を補完
+    "wix.vscode-import-cost", // import したパッケージのバンドルサイズをインライン表示
+    // ===================================================================
+    // 【開発】React / UI フレームワーク
+    // React・Tailwind の開発速度を上げるスニペット・補完
+    // ===================================================================
+    "dsznajder.es7-react-js-snippets", // React/Redux のスニペット集（rfce とか打つやつ）
+    "burkeholland.simple-react-snippets", // シンプルな React スニペット
+    "bradlc.vscode-tailwindcss", // Tailwind CSS のクラス補完・プレビュー
+    // ===================================================================
+    // 【開発】アクセシビリティ
+    // WCAG 準拠のための自動 lint チェック
+    // ===================================================================
+    "deque-systems.vscode-axe-linter", // axe によるアクセシビリティ違反の静的検出
+    // ===================================================================
+    // 【開発】ドキュメント / Markdown
+    // 設計書・README・仕様書の執筆・整形支援
+    // ===================================================================
+    "yzhang.markdown-all-in-one", // Markdown の見出し・プレビュー・ショートカット統合
+    "takumii.markdowntable", // Markdown テーブルの自動整形
+    "davidanson.vscode-markdownlint", // Markdown の文法 lint チェック
+    // ===================================================================
+    // 【開発】ダイアグラム / Mermaid
+    // アーキテクチャ図・フロー図を Markdown 内で描く
+    // ===================================================================
+    "bierner.markdown-mermaid", // Markdown プレビューで Mermaid 図を表示
+    "vstirbu.vscode-mermaid-preview", // .mmd ファイルのリアルタイムプレビュー
+    "mermaidchart.vscode-mermaid-chart", // Mermaid Chart クラウドとの連携
+    // ===================================================================
+    // 【テスト】テストランナー / 実行・管理
+    // ユニット〜E2E テストの実行・結果確認を IDE 内で完結
+    // ===================================================================
+    "vitest.explorer", // Vitest のテストをサイドバーから実行・管理
+    "firsttris.vscode-jest-runner", // Jest テストをファイル・行単位でワンクリック実行
+    "ms-playwright.playwright", // Playwright E2E テストの実行・デバッグ・コード生成
+  ]
+}

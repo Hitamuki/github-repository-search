@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: サーバーサイドデバッグ",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      "skipFiles": [
+        "${workspaceFolder}/node_modules/**",
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Next.js: クライアントサイドデバッグ",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "skipFiles": [
+        "**/node_modules/**",
+        "<node_internals>/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/*": "${webRoot}/*",
+        "turbopack://_N_E/*": "${webRoot}/*"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Next.js: フルスタックデバッグ",
+      "configurations": [
+        "Next.js: サーバーサイドデバッグ",
+        "Next.js: クライアントサイドデバッグ"
+      ],
+      "stopAll": true
+    }
+  ]
+}
