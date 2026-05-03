@@ -1,30 +1,24 @@
-import { Geist, Geist_Mono } from "next/font/google"
+/**
+ * @file ルートレイアウト
+ * @remarks
+ * アプリケーション全体に適用されるレイアウト。
+ * Next.js App Router の規約により `layout.tsx` に配置する。
+ */
+
+import type { ReactNode } from "react"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+/**
+ * ルートレイアウトコンポーネント
+ * @param root0 - コンポーネント props
+ * @param root0.children - 各ページのコンテンツ
+ * @returns ルート HTML ドキュメント
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
-    >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+    <html lang="ja">
+      <body>{children}</body>
     </html>
   )
 }
