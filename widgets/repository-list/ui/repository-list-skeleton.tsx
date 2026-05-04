@@ -6,6 +6,7 @@ import { Skeleton } from "@/shared/ui/skeleton"
 
 /**
  * リポジトリ一覧のローディングスケルトン
+ * @returns レンダリングされる JSX 要素
  */
 export function RepositoryListSkeleton() {
   return (

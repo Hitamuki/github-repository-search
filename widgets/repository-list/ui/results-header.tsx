@@ -24,6 +24,7 @@ interface ResultsHeaderProps {
  * @param root0.totalPages
  * @param props.currentSort - 現在のソートオプション
  * @param root0.currentSort
+ * @returns レンダリングされる JSX 要素
  */
 export function ResultsHeader({
   totalCount,

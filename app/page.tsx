@@ -4,8 +4,11 @@
  */
 import { Suspense } from "react"
 
-import { SearchForm, searchParamsSchema  } from "@/features/search-repositories"
-import { RepositoryList, RepositoryListSkeleton } from "@/widgets/repository-list"
+import { SearchForm, searchParamsSchema } from "@/features/search-repositories"
+import {
+  RepositoryList,
+  RepositoryListSkeleton,
+} from "@/widgets/repository-list"
 
 import type { Metadata } from "next"
 
@@ -17,6 +20,7 @@ interface HomePageProps {
  * 動的メタデータ生成
  * @param root0.searchParams - URL クエリパラメータ
  * @param root0
+ * @returns メタデータオブジェクト
  */
 export async function generateMetadata({
   searchParams,
@@ -32,11 +36,12 @@ export async function generateMetadata({
  * トップページコンポーネント
  * @param root0.searchParams - URL クエリパラメータ（Next.js 15+ では Promise）
  * @param root0
+ * @returns レンダリングされる JSX 要素
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const rawParams = await searchParams
   const validated = searchParamsSchema.parse({
-    q:    typeof rawParams.q    === "string" ? rawParams.q    : "",
+    q: typeof rawParams.q === "string" ? rawParams.q : "",
     sort: typeof rawParams.sort === "string" ? rawParams.sort : "best match",
     page: typeof rawParams.page === "string" ? rawParams.page : "1",
   })
@@ -44,8 +49,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { q, sort, page } = validated
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 space-y-6">
-
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
       {!q && (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <div className="rounded-full bg-primary/10 p-4">
@@ -61,7 +65,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <h1 className="text-2xl font-bold tracking-tight text-balance">
               GitHub リポジトリ検索
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground text-pretty">
+            <p className="mt-2 text-sm text-pretty text-muted-foreground">
               キーワードを入力して、GitHub 上のリポジトリを探しましょう
             </p>
           </div>
@@ -71,7 +75,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <SearchForm defaultValue={q} />
 
       {q && (
-        <Suspense key={`${q}-${sort}-${page}`} fallback={<RepositoryListSkeleton />}>
+        <Suspense
+          key={`${q}-${sort}-${page}`}
+          fallback={<RepositoryListSkeleton />}
+        >
           <RepositoryList q={q} sort={sort} page={page} />
         </Suspense>
       )}

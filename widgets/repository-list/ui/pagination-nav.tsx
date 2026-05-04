@@ -2,10 +2,11 @@
 /**
  * @file ページネーションナビゲーション
  */
+import { range } from "es-toolkit"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/shared/lib/utils"
 
 import type { SortOption } from "@/entities/repository"
 
@@ -17,10 +18,11 @@ interface PaginationNavProps {
 }
 
 /**
- *
- * @param q
- * @param sort
- * @param page
+ * ページネーション用 URL を生成する
+ * @param q - 検索キーワード
+ * @param sort - ソートオプション
+ * @param page - ページ番号
+ * @returns ページネーション用 URL 文字列
  */
 function buildHref(q: string, sort: SortOption, page: number) {
   const params = new URLSearchParams({ q })
@@ -40,6 +42,7 @@ function buildHref(q: string, sort: SortOption, page: number) {
  * @param root0.q
  * @param props.sort - ソートオプション
  * @param root0.sort
+ * @returns レンダリングされる JSX 要素、またはページが1以下の場合は null
  */
 export function PaginationNav({
   currentPage,
@@ -50,14 +53,9 @@ export function PaginationNav({
   if (totalPages <= 1) return null
 
   const delta = 2
-  const range: number[] = []
-  for (
-    let i = Math.max(1, currentPage - delta);
-    i <= Math.min(totalPages, currentPage + delta);
-    i++
-  ) {
-    range.push(i)
-  }
+  const start = Math.max(1, currentPage - delta)
+  const end = Math.min(totalPages, currentPage + delta)
+  const pages = range(start, end + 1)
 
   const btnBase =
     "inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -76,24 +74,39 @@ export function PaginationNav({
           <ChevronLeft className="h-4 w-4" />
         </Link>
       ) : (
-        <span className={cn(btnBase, "pointer-events-none opacity-40 bg-background")}>
+        <span
+          className={cn(
+            btnBase,
+            "pointer-events-none bg-background opacity-40"
+          )}
+        >
           <ChevronLeft className="h-4 w-4" />
         </span>
       )}
 
-      {range[0] > 1 && (
+      {pages[0] > 1 && (
         <>
-          <Link href={buildHref(q, sort, 1)} className={cn(btnBase, "bg-background hover:bg-muted")}>1</Link>
-          {range[0] > 2 && <span className="px-1 text-muted-foreground">…</span>}
+          <Link
+            href={buildHref(q, sort, 1)}
+            className={cn(btnBase, "bg-background hover:bg-muted")}
+          >
+            1
+          </Link>
+          {pages[0] > 2 && (
+            <span className="px-1 text-muted-foreground">…</span>
+          )}
         </>
       )}
 
-      {range.map((p) =>
+      {pages.map((p) =>
         p === currentPage ? (
           <span
             key={p}
             aria-current="page"
-            className={cn(btnBase, "border-primary bg-primary text-primary-foreground")}
+            className={cn(
+              btnBase,
+              "border-primary bg-primary text-primary-foreground"
+            )}
           >
             {p}
           </span>
@@ -108,9 +121,9 @@ export function PaginationNav({
         )
       )}
 
-      {range[range.length - 1] < totalPages && (
+      {pages[pages.length - 1] < totalPages && (
         <>
-          {range[range.length - 1] < totalPages - 1 && (
+          {pages[pages.length - 1] < totalPages - 1 && (
             <span className="px-1 text-muted-foreground">…</span>
           )}
           <Link
@@ -131,7 +144,12 @@ export function PaginationNav({
           <ChevronRight className="h-4 w-4" />
         </Link>
       ) : (
-        <span className={cn(btnBase, "pointer-events-none opacity-40 bg-background")}>
+        <span
+          className={cn(
+            btnBase,
+            "pointer-events-none bg-background opacity-40"
+          )}
+        >
           <ChevronRight className="h-4 w-4" />
         </span>
       )}

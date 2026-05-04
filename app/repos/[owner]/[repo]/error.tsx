@@ -20,6 +20,7 @@ interface ErrorProps {
  * @param root0.error
  * @param props.reset - 再試行ハンドラ
  * @param root0.reset
+ * @returns レンダリングされる JSX 要素
  */
 export default function RepoError({ error, reset }: ErrorProps) {
   useEffect(() => {
@@ -42,9 +43,7 @@ export default function RepoError({ error, reset }: ErrorProps) {
           <Button variant="outline" onClick={reset}>
             再試行
           </Button>
-          <Button asChild variant="ghost">
-            <Link href="/">検索に戻る</Link>
-          </Button>
+          <Button variant="ghost" render={<Link href="/">検索に戻る</Link>} />
         </div>
       </div>
     </div>

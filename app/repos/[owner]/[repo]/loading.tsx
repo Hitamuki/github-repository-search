@@ -5,10 +5,11 @@ import { Skeleton } from "@/shared/ui/skeleton"
 
 /**
  * リポジトリ詳細ページのローディングスケルトン
+ * @returns レンダリングされる JSX 要素
  */
 export default function RepoLoading() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
       <div className="flex gap-4 rounded-xl border bg-card p-5">
         <Skeleton className="h-16 w-16 shrink-0 rounded-xl" />
         <div className="flex-1 space-y-2.5">

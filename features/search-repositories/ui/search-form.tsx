@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Search, Loader2 } from "lucide-react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useTransition } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 
@@ -27,6 +27,7 @@ interface SearchFormProps {
  * @param root0.defaultValue
  * @param props.className - 追加 CSS クラス
  * @param root0.className
+ * @returns レンダリングされる JSX 要素
  */
 export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
   const router = useRouter()
@@ -37,12 +38,14 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<SearchQueryInput>({
     resolver: zodResolver(searchQuerySchema),
     defaultValues: { q: defaultValue },
   })
+
+  const qValue = useWatch({ control, name: "q" })
 
   const onSubmit = useCallback(
     (data: SearchQueryInput) => {
@@ -64,7 +67,7 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
     >
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             {...register("q")}
             placeholder="リポジトリ名を入力してください"
@@ -78,7 +81,7 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
         </div>
         <Button
           type="submit"
-          disabled={isPending || !watch("q")?.trim()}
+          disabled={isPending || !qValue?.trim()}
           className="shrink-0"
         >
           {isPending ? (

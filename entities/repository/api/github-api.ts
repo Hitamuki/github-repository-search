@@ -3,11 +3,13 @@
  * @remarks サーバーサイド専用。fetch with Next.js cache を活用。
  */
 import "server-only"
+
 import {
   GITHUB_API_BASE,
   GITHUB_API_HEADERS,
   PER_PAGE,
 } from "@/shared/config/github"
+import { logger } from "@/shared/lib/logger"
 
 import type {
   SearchRepositoriesResponse,
@@ -40,8 +42,7 @@ export async function searchRepositories(params: {
   page: number
 }): Promise<SearchRepositoriesResponse> {
   const { q, sort, page } = params
-  const sortParam =
-    sort === "best match" ? "" : `&sort=${sort}&order=desc`
+  const sortParam = sort === "best match" ? "" : `&sort=${sort}&order=desc`
   const url = `${GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(q)}&per_page=${PER_PAGE}&page=${page}${sortParam}`
 
   const res = await fetch(url, {
@@ -50,18 +51,21 @@ export async function searchRepositories(params: {
   })
 
   if (res.status === 403) {
+    logger.warn({ url, status: 403 }, "GitHub API レート制限")
     throw new GitHubApiError(
       "APIレート制限に達しました。しばらくしてからお試しください。",
       403
     )
   }
   if (res.status === 422) {
+    logger.warn({ url, status: 422 }, "GitHub API 無効なクエリ")
     throw new GitHubApiError(
       "検索クエリが無効です。別のキーワードをお試しください。",
       422
     )
   }
   if (!res.ok) {
+    logger.error({ url, status: res.status }, "GitHub API エラー")
     throw new GitHubApiError(
       `GitHub APIエラーが発生しました（${res.status}）`,
       res.status
@@ -90,9 +94,11 @@ export async function getRepository(
   })
 
   if (res.status === 404) {
+    logger.info({ url, status: 404 }, "リポジトリが見つかりません")
     throw new GitHubApiError("リポジトリが見つかりませんでした。", 404)
   }
   if (!res.ok) {
+    logger.error({ url, status: res.status }, "リポジトリ取得エラー")
     throw new GitHubApiError(
       `リポジトリ情報の取得に失敗しました（${res.status}）`,
       res.status

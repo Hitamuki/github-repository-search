@@ -8,6 +8,8 @@ const nextConfig = {
       },
     ],
   },
+  // pino はワーカースレッドを使うため Next.js バンドルから除外
+  serverExternalPackages: ["pino", "pino-pretty"],
 }
 
 export default nextConfig

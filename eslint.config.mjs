@@ -80,9 +80,9 @@ const eslintConfig = defineConfig([
   },
 
   // ─── shadcn/ui 自動生成ファイルの除外 ───────────────────────────────────
-  // components/ui/ と lib/utils.ts は shadcn CLI が生成するため JSDoc を強制しない
+  // shared/ui/ と shared/lib/utils.ts は shadcn CLI が生成するため JSDoc を強制しない
   {
-    files: ["components/ui/**", "lib/utils.ts"],
+    files: ["shared/ui/**", "shared/lib/utils.ts"],
     rules: {
       "jsdoc/require-jsdoc": "off",
       "jsdoc/require-param": "off",

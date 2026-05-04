@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button"
 
 /**
  * リポジトリが見つからない場合の 404 ページ
+ * @returns レンダリングされる JSX 要素
  */
 export default function RepoNotFound() {
   return (
@@ -14,14 +15,14 @@ export default function RepoNotFound() {
       <div className="flex flex-col items-center gap-4 rounded-xl border bg-card px-6 py-16 text-center shadow-sm">
         <p className="text-5xl font-bold text-muted-foreground/30">404</p>
         <div>
-          <h2 className="text-lg font-semibold">リポジトリが見つかりませんでした</h2>
+          <h2 className="text-lg font-semibold">
+            リポジトリが見つかりませんでした
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             リポジトリが削除されているか、非公開になっている可能性があります
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/">検索に戻る</Link>
-        </Button>
+        <Button variant="outline" render={<Link href="/">検索に戻る</Link>} />
       </div>
     </div>
   )

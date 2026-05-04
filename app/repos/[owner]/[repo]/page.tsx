@@ -6,8 +6,8 @@ import Image from "next/image"
 import { notFound } from "next/navigation"
 
 import { getRepository, GitHubApiError } from "@/entities/repository"
-import { cn } from "@/lib/utils"
 import { formatCount, formatDate } from "@/shared/lib/format"
+import { cn } from "@/shared/lib/utils"
 import { Badge } from "@/shared/ui/badge"
 
 import type { Metadata } from "next"
@@ -21,8 +21,11 @@ interface RepoPageProps {
  * 動的メタデータ生成
  * @param root0.params - ルートパラメータ
  * @param root0
+ * @returns メタデータオブジェクト
  */
-export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: RepoPageProps): Promise<Metadata> {
   const { owner, repo } = await params
   return { title: `${owner}/${repo}` }
 }
@@ -32,13 +35,17 @@ export async function generateMetadata({ params }: RepoPageProps): Promise<Metad
  * @param root0.params - ルートパラメータ（owner, repo）
  * @param root0
  * @param root0.searchParams - URL クエリパラメータ（戻り先リンク用）
+ * @returns レンダリングされる JSX 要素
  */
-export default async function RepoPage({ params, searchParams }: RepoPageProps) {
+export default async function RepoPage({
+  params,
+  searchParams,
+}: RepoPageProps) {
   const { owner, repo: repoName } = await params
   const rawSearch = await searchParams
 
   const backParams = new URLSearchParams()
-  if (typeof rawSearch.q    === "string") backParams.set("q",    rawSearch.q)
+  if (typeof rawSearch.q === "string") backParams.set("q", rawSearch.q)
   if (typeof rawSearch.sort === "string") backParams.set("sort", rawSearch.sort)
   if (typeof rawSearch.page === "string") backParams.set("page", rawSearch.page)
   const backHref = backParams.toString() ? `/?${backParams.toString()}` : "/"
@@ -54,24 +61,26 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
   }
 
   const stats = [
-    { label: "Star 数",    value: repoData.stargazers_count,  icon: Star },
-    { label: "Watcher 数", value: repoData.watchers_count,    icon: Eye },
-    { label: "Fork 数",    value: repoData.forks_count,       icon: GitFork },
-    { label: "Issue 数",   value: repoData.open_issues_count, icon: AlertCircle },
+    { label: "Star 数", value: repoData.stargazers_count, icon: Star },
+    { label: "Watcher 数", value: repoData.watchers_count, icon: Eye },
+    { label: "Fork 数", value: repoData.forks_count, icon: GitFork },
+    { label: "Issue 数", value: repoData.open_issues_count, icon: AlertCircle },
   ]
 
   const meta = [
-    { label: "オーナー",          value: repoData.owner.login },
+    { label: "オーナー", value: repoData.owner.login },
     { label: "デフォルトブランチ", value: repoData.default_branch },
-    { label: "作成日",            value: formatDate(repoData.created_at) },
-    { label: "最終更新日",        value: formatDate(repoData.updated_at) },
-    repoData.license && { label: "ライセンス", value: repoData.license.spdx_id },
-    { label: "可視性",            value: repoData.private ? "Private" : "Public" },
+    { label: "作成日", value: formatDate(repoData.created_at) },
+    { label: "最終更新日", value: formatDate(repoData.updated_at) },
+    repoData.license && {
+      label: "ライセンス",
+      value: repoData.license.spdx_id,
+    },
+    { label: "可視性", value: repoData.private ? "Private" : "Public" },
   ].filter(Boolean) as { label: string; value: string }[]
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 space-y-5">
-
+    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
       {/* ヒーローカード */}
       <div className="flex flex-wrap items-start gap-4 rounded-xl border bg-card p-5 shadow-sm">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border">
@@ -87,18 +96,20 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight">{repoData.full_name}</h1>
-            {repoData.private  && <Badge variant="outline">Private</Badge>}
+            <h1 className="text-xl font-bold tracking-tight">
+              {repoData.full_name}
+            </h1>
+            {repoData.private && <Badge variant="outline">Private</Badge>}
             {repoData.archived && <Badge variant="outline">Archived</Badge>}
-            {repoData.fork     && <Badge variant="outline">Fork</Badge>}
+            {repoData.fork && <Badge variant="outline">Fork</Badge>}
           </div>
           {repoData.language && (
             <div className="mt-1">
-              <Badge variant="primary">{repoData.language}</Badge>
+              <Badge variant="default">{repoData.language}</Badge>
             </div>
           )}
           {repoData.description && (
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed text-pretty">
+            <p className="mt-2 text-sm leading-relaxed text-pretty text-muted-foreground">
               {repoData.description}
             </p>
           )}
@@ -122,7 +133,10 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
             key={label}
             className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center shadow-sm"
           >
-            <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <Icon
+              className="h-5 w-5 text-muted-foreground"
+              aria-hidden="true"
+            />
             <span className="text-2xl font-bold tracking-tight tabular-nums">
               {formatCount(value)}
             </span>
@@ -140,12 +154,12 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
             <div
               key={item.label}
               className={cn(
-                "border-b border-r p-3",
+                "border-r border-b p-3",
                 i % 2 === 1 && "sm:border-r",
                 i % 3 === 2 && "sm:border-r-0"
               )}
             >
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                 {item.label}
               </p>
               <p className="mt-0.5 text-sm font-medium">{item.value}</p>
@@ -157,12 +171,12 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
       {/* トピック */}
       {repoData.topics && repoData.topics.length > 0 && (
         <div className="rounded-xl border bg-card p-4 shadow-sm">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="mb-3 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
             トピック
           </p>
           <div className="flex flex-wrap gap-1.5">
             {repoData.topics.map((topic) => (
-              <Badge key={topic} variant="success">
+              <Badge key={topic} variant="secondary">
                 {topic}
               </Badge>
             ))}
@@ -173,7 +187,7 @@ export default async function RepoPage({ params, searchParams }: RepoPageProps) 
       {/* 戻るリンク */}
       <a
         href={backHref}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         ← 検索結果に戻る
       </a>

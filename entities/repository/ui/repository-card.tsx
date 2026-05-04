@@ -22,6 +22,7 @@ interface RepositoryCardProps {
  * @param root0.repo
  * @param props.searchParams - 検索パラメータ（詳細ページからの戻り先用）
  * @param root0.searchParams
+ * @returns レンダリングされる JSX 要素
  */
 export function RepositoryCard({ repo, searchParams }: RepositoryCardProps) {
   return (
@@ -41,14 +42,18 @@ export function RepositoryCard({ repo, searchParams }: RepositoryCardProps) {
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="truncate font-semibold text-sm text-foreground transition-colors group-hover:text-primary">
+          <span className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
             {repo.full_name}
           </span>
           {repo.archived && (
-            <Badge variant="outline" className="text-[10px]">Archived</Badge>
+            <Badge variant="outline" className="text-[10px]">
+              Archived
+            </Badge>
           )}
           {repo.fork && (
-            <Badge variant="outline" className="text-[10px]">Fork</Badge>
+            <Badge variant="outline" className="text-[10px]">
+              Fork
+            </Badge>
           )}
         </div>
         {repo.description && (
@@ -60,7 +65,7 @@ export function RepositoryCard({ repo, searchParams }: RepositoryCardProps) {
 
       <div className="flex shrink-0 flex-col items-end gap-1">
         {repo.language && (
-          <Badge variant="primary" className="text-[10px]">
+          <Badge variant="default" className="text-[10px]">
             {repo.language}
           </Badge>
         )}

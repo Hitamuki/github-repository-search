@@ -1,6 +1,7 @@
 /**
  * @file 数値・日付フォーマットユーティリティ
  */
+import { isNil } from "es-toolkit"
 
 /**
  * 数値を k 単位で短縮表示する
@@ -8,7 +9,7 @@
  * @returns フォーマット済み文字列（例: 1234 → "1.2k"）
  */
 export function formatCount(n: number | null | undefined): string {
-  if (n === null || n === undefined) return "−"
+  if (isNil(n)) return "−"
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
   return String(n)
 }

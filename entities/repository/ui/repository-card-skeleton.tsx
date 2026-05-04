@@ -5,6 +5,7 @@ import { Skeleton } from "@/shared/ui/skeleton"
 
 /**
  * リポジトリカードのローディングスケルトン
+ * @returns レンダリングされる JSX 要素
  */
 export function RepositoryCardSkeleton() {
   return (

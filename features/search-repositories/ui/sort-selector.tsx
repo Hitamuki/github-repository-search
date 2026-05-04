@@ -5,7 +5,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useTransition } from "react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/shared/lib/utils"
 
 import { SORT_OPTIONS } from "../model/schema"
 
@@ -20,6 +20,7 @@ interface SortSelectorProps {
  * @param props.currentSort - 現在のソートオプション
  * @param root0
  * @param root0.currentSort
+ * @returns レンダリングされる JSX 要素
  */
 export function SortSelector({ currentSort }: SortSelectorProps) {
   const router = useRouter()
@@ -45,7 +46,11 @@ export function SortSelector({ currentSort }: SortSelectorProps) {
   )
 
   return (
-    <div className="flex flex-wrap gap-1.5" role="group" aria-label="検索結果のソート順">
+    <div
+      className="flex flex-wrap gap-1.5"
+      role="group"
+      aria-label="検索結果のソート順"
+    >
       {SORT_OPTIONS.map((opt) => {
         const isActive = currentSort === opt.value
         return (
@@ -56,7 +61,7 @@ export function SortSelector({ currentSort }: SortSelectorProps) {
             aria-pressed={isActive}
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-all",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
               "disabled:pointer-events-none disabled:opacity-60",
               isActive
                 ? "border-primary bg-primary/10 text-primary"

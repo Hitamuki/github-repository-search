@@ -1,7 +1,11 @@
 /**
  * @file リポジトリ一覧 async Server Component（SSR）
  */
-import { searchRepositories, RepositoryCard, type SortOption } from "@/entities/repository"
+import {
+  searchRepositories,
+  RepositoryCard,
+  type SortOption,
+} from "@/entities/repository"
 import { GitHubApiError } from "@/entities/repository"
 import { MAX_PAGES, PER_PAGE } from "@/shared/config/github"
 

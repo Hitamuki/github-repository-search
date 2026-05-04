@@ -2,12 +2,12 @@
  * @file ルートレイアウト
  * @remarks アプリケーション全体に適用されるレイアウト。
  */
-import { GitHubLogoIcon } from "@radix-ui/react-icons"
 import { Noto_Sans_JP } from "next/font/google"
 import Link from "next/link"
+import { FaGithub } from "react-icons/fa"
 
 import type { Metadata, Viewport } from "next"
-import "./globals.css"
+import "@/shared/styles/globals.css"
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -35,8 +35,13 @@ export const viewport: Viewport = {
  * ルートレイアウトコンポーネント
  * @param root0 - コンポーネント props
  * @param root0.children - 各ページのコンテンツ
+ * @returns レンダリングされる JSX 要素
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="ja" className={notoSansJP.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
@@ -47,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 href="/"
                 className="flex items-center gap-2 font-bold tracking-tight text-foreground transition-colors hover:text-primary"
               >
-                <GitHubLogoIcon className="h-5 w-5" />
+                <FaGithub className="h-5 w-5" />
                 <span className="text-[15px]">GitHub リポジトリ検索</span>
               </Link>
             </div>
