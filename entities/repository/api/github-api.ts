@@ -76,25 +76,29 @@ export async function searchRepositories(params: {
   const log = await createRequestLogger()
   const url = buildSearchUrl(params)
 
-  const res = await fetch(url, {
-    headers: GITHUB_API_HEADERS,
-    next: { revalidate: 30 }, // req-009-001 — ISR 30秒キャッシュ
-  })
+  try {
+    const res = await fetch(url, {
+      headers: GITHUB_API_HEADERS,
+      next: { revalidate: 30 }, // req-009-001 — ISR 30秒キャッシュ
+    })
 
-  if (res.status === 403) {
-    log.warn({ url, status: 403 }, "GitHub API レート制限") // req-005-004, req-010-006
-    throw new GitHubApiError(MSG["MSG-201"], 403)
-  }
-  if (res.status === 422) {
-    log.warn({ url, status: 422 }, "GitHub API 無効なクエリ") // req-005-005, req-010-006
-    throw new GitHubApiError(MSG["MSG-202"], 422)
-  }
-  if (!res.ok) {
-    log.error({ url, status: res.status }, "GitHub API エラー") // req-005-003, req-010-005
-    throw new GitHubApiError(MSG_TPL["MSG-203"](res.status), res.status)
-  }
+    if (res.status === 403) {
+      log.warn({ url, status: 403 }, "GitHub API レート制限") // req-005-004, req-010-006
+      throw new GitHubApiError(MSG["MSG-201"], 403)
+    }
+    if (res.status === 422) {
+      log.warn({ url, status: 422 }, "GitHub API 無効なクエリ") // req-005-005, req-010-006
+      throw new GitHubApiError(MSG["MSG-202"], 422)
+    }
+    if (!res.ok) {
+      log.error({ url, status: res.status }, "GitHub API エラー") // req-005-003, req-010-005
+      throw new GitHubApiError(MSG_TPL["MSG-203"](res.status), res.status)
+    }
 
-  return res.json() as Promise<SearchRepositoriesResponse>
+    return (await res.json()) as SearchRepositoriesResponse
+  } catch (error) {
+    throw error
+  }
 }
 
 /**

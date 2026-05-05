@@ -15,12 +15,13 @@ export default defineConfig({
     alias: {
       // tsconfig.json の paths "@/*": ["./*"] に対応
       "@": resolve(import.meta.dirname, "."),
+      "server-only": resolve(import.meta.dirname, "tests/mocks/empty.ts"),
     },
   },
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./vitest.setup.ts"],
+    setupFiles: ["./vitest.setup.tsx"],
     include: ["**/*.test.{ts,tsx}"],
     exclude: [
       "**/node_modules/**",

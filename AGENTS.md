@@ -48,6 +48,7 @@ Server Component をデフォルト、`"use client"` は必要箇所に最小限
 | ファイル先頭 JSDoc | `@see req-XXX, uc-XXX` | そのファイルが実装する要件・シナリオを宣言 |
 | 特定の実装行 | `// req-XXX — 理由` | 仕様上重要な1行（検証ロジック・セキュリティ制約等）に限定 |
 | テスト名 | `test("uc-XXX: ...")` | Gherkin シナリオと 1対1 対応させる |
+| テスト内 | `// Arrange` / `// Act` / `// Assert` | AAA 原則の各フェーズを明示する |
 
 ```typescript
 /**
@@ -260,7 +261,7 @@ Static（広：ESLint + TypeScript）
 ### 7.5 単体テスト規約
 
 - **co-location**: テストファイルはテスト対象のソースファイルと同じディレクトリに配置する
-- **AAA 原則**: テストは Arrange（準備）→ Act（実行）→ Assert（検証）の3フェーズで構成する
+- **AAA 原則**: テストは Arrange → Act → Assert の3フェーズで構成し、各フェーズの開始行に `// Arrange` / `// Act` / `// Assert` コメントを付与して明示する
 - **メソッド名**: `メソッド名_テスト条件_期待する振る舞い` 形式で命名する（例: `searchRepositories_emptyQuery_throwsValidationError`）
 
 ---
