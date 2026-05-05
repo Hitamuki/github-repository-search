@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "dev:log": "next dev --turbopack 2>&1 | pino-pretty"
+    "dev:log": "next dev --turbopack 2>&1 | pino-pretty",
+    "dev:mobile": "next dev --turbopack --hostname 0.0.0.0"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

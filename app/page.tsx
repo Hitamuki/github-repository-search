@@ -1,10 +1,14 @@
 /**
  * @file トップ（検索）ページ — async Server Component
  * @remarks URL クエリパラメータ: q, sort, page
+ * @see req-001-search, req-002-results, req-004-pagination, req-007-sort, req-009-performance
+ * @see uc-001-search, uc-002-results, uc-004-pagination, uc-007-sort
  */
 import { Suspense } from "react"
 
 import { SearchForm, searchParamsSchema } from "@/features/search-repositories"
+import { APP_NAME } from "@/shared/config/app"
+import { LBL } from "@/shared/config/labels"
 import {
   RepositoryList,
   RepositoryListSkeleton,
@@ -28,7 +32,7 @@ export async function generateMetadata({
   const params = await searchParams
   const q = typeof params.q === "string" ? params.q : ""
   return {
-    title: q ? `「${q}」の検索結果` : "GitHub リポジトリ検索",
+    title: q ? `「${q}」の検索結果` : APP_NAME,
   }
 }
 
@@ -40,13 +44,15 @@ export async function generateMetadata({
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const rawParams = await searchParams
-  const validated = searchParamsSchema.parse({
+  const parseResult = searchParamsSchema.safeParse({
     q: typeof rawParams.q === "string" ? rawParams.q : "",
     sort: typeof rawParams.sort === "string" ? rawParams.sort : "best match",
     page: typeof rawParams.page === "string" ? rawParams.page : "1",
   })
-
-  const { q, sort, page } = validated
+  // 不正なクエリパラメータはデフォルト値にフォールバック（ZodError を UI に露出させない）
+  const { q, sort, page } = parseResult.success
+    ? parseResult.data
+    : { q: "", sort: "best match" as const, page: 1 }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
@@ -63,10 +69,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-balance">
-              GitHub リポジトリ検索
+              {APP_NAME}
             </h1>
             <p className="mt-2 text-sm text-pretty text-muted-foreground">
-              キーワードを入力して、GitHub 上のリポジトリを探しましょう
+              {LBL["LBL-004"]}
             </p>
           </div>
         </div>

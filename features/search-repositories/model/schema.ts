@@ -1,7 +1,13 @@
 /**
  * @file features/search-repositories Zod バリデーションスキーマ
+ * @see req-001-002, req-001-011, req-001-012, req-004-001, req-007-001, req-007-007
+ * @see uc-001-005, uc-001-006, uc-001-007
  */
 import { z } from "zod"
+
+import { QUERY_MAX_LENGTH, QUERY_MIN_LENGTH } from "@/shared/config/app"
+import { MAX_PAGES } from "@/shared/config/github"
+import { MSG } from "@/shared/config/messages"
 
 import type { SortOption } from "@/entities/repository"
 
@@ -12,22 +18,22 @@ export const SORT_OPTIONS = [
   { value: "updated" as SortOption, label: "更新日" },
 ] as const
 
-/** 検索フォームの入力バリデーションスキーマ */
+/** 検索フォームの入力バリデーションスキーマ（req-001-002, req-001-011, req-001-012） */
 export const searchQuerySchema = z.object({
   q: z
     .string()
-    .min(1, "検索キーワードを入力してください")
-    .max(256, "キーワードは256文字以内で入力してください")
+    .min(QUERY_MIN_LENGTH, MSG["MSG-001"])
+    .max(QUERY_MAX_LENGTH, MSG["MSG-002"])
     .trim(),
 })
 
-/** URL クエリパラメータのバリデーションスキーマ */
+/** URL クエリパラメータのバリデーションスキーマ（req-004-001, req-007-001, req-007-007） */
 export const searchParamsSchema = z.object({
   q: z.string().trim().default(""),
   sort: z
     .enum(["best match", "stars", "forks", "updated"])
     .default("best match"),
-  page: z.coerce.number().int().min(1).max(20).default(1),
+  page: z.coerce.number().int().min(1).max(MAX_PAGES).default(1),
 })
 
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>

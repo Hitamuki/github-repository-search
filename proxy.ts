@@ -1,0 +1,23 @@
+/**
+ * @file Proxy — リクエストに x-request-id を付与する
+ */
+import { NextRequest, NextResponse } from "next/server"
+
+/**
+ * すべてのリクエストに一意の requestId をヘッダーとして付与する
+ * @param request - Next.js リクエストオブジェクト
+ * @returns x-request-id ヘッダーを追加したレスポンス
+ */
+export function proxy(request: NextRequest): NextResponse {
+  const requestId = crypto.randomUUID()
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set("x-request-id", requestId)
+
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  })
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
+}

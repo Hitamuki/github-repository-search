@@ -2,6 +2,8 @@
 /**
  * @file 検索フォーム（Client Component）
  * @remarks URL クエリパラメータへの反映・ブラウザバック対応
+ * @see req-001-004, req-001-005, req-001-007, req-001-009, req-001-010, req-006-001, req-006-003
+ * @see uc-001-001, uc-001-002, uc-001-004, uc-001-005, uc-001-006, uc-001-007, uc-006-001, uc-006-002
  */
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Search, Loader2 } from "lucide-react"
@@ -9,6 +11,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useTransition } from "react"
 import { useForm, useWatch } from "react-hook-form"
 
+import { LBL } from "@/shared/config/labels"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
@@ -53,6 +56,7 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
       params.set("q", data.q)
       params.set("page", "1")
 
+      // req-001-005, req-001-007 — submit 時にのみ URL を更新し、SSR 結果を再描画
       startTransition(() => {
         router.push(`${pathname}?${params.toString()}`)
       })
@@ -70,31 +74,32 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
           <Search className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             {...register("q")}
-            placeholder="リポジトリ名を入力してください"
+            placeholder={LBL["LBL-001"]}
             className={cn(
               "pl-9",
               errors.q && "border-destructive focus-visible:ring-destructive"
             )}
-            aria-invalid={!!errors.q}
+            aria-invalid={!!errors.q} // req-006-001, req-006-003
             aria-describedby={errors.q ? "search-error" : undefined}
           />
         </div>
         <Button
           type="submit"
-          disabled={isPending || !qValue?.trim()}
+          disabled={isPending || !qValue?.trim()} // req-001-009, req-001-010
           className="shrink-0"
         >
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              検索中
+              {LBL["LBL-003"]}
             </>
           ) : (
-            "検索"
+            LBL["LBL-002"]
           )}
         </Button>
       </div>
       {errors.q && (
+        // req-006-001 — スクリーンリーダーへエラーを即座に通知
         <p id="search-error" className="text-xs text-destructive" role="alert">
           {errors.q.message}
         </p>

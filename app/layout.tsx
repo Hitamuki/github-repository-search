@@ -3,8 +3,9 @@
  * @remarks アプリケーション全体に適用されるレイアウト。
  */
 import { Noto_Sans_JP } from "next/font/google"
-import Link from "next/link"
-import { FaGithub } from "react-icons/fa"
+
+import { APP_DESCRIPTION, APP_NAME } from "@/shared/config/app"
+import { SiteHeader } from "@/widgets/site-header"
 
 import type { Metadata, Viewport } from "next"
 import "@/shared/styles/globals.css"
@@ -18,11 +19,10 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | GitHub リポジトリ検索",
-    default: "GitHub リポジトリ検索",
+    template: `%s | ${APP_NAME}`,
+    default: APP_NAME,
   },
-  description:
-    "GitHub のリポジトリをキーワードで検索し、詳細情報を確認できるアプリです。",
+  description: APP_DESCRIPTION,
   robots: { index: false },
 }
 
@@ -46,17 +46,7 @@ export default function RootLayout({
     <html lang="ja" className={notoSansJP.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
         <div className="flex min-h-screen flex-col">
-          <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="mx-auto flex h-14 max-w-3xl items-center gap-3 px-4">
-              <Link
-                href="/"
-                className="flex items-center gap-2 font-bold tracking-tight text-foreground transition-colors hover:text-primary"
-              >
-                <FaGithub className="h-5 w-5" />
-                <span className="text-[15px]">GitHub リポジトリ検索</span>
-              </Link>
-            </div>
-          </header>
+          <SiteHeader />
           <main className="flex-1">{children}</main>
         </div>
       </body>

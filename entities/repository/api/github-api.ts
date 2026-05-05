@@ -1,15 +1,19 @@
 /**
  * @file GitHub API クライアント（entities 層）
  * @remarks サーバーサイド専用。fetch with Next.js cache を活用。
+ * @see req-001-006, req-001-015, req-005-003, req-005-004, req-005-005
+ * @see req-008-007, req-009-001, req-009-002, req-010-005, req-010-006, req-010-007
+ * @see uc-005-001, uc-005-003, uc-005-006
  */
-import "server-only"
+import "server-only" // req-001-015, req-008-007 — クライアントバンドルへの混入を防ぐ
 
 import {
   GITHUB_API_BASE,
   GITHUB_API_HEADERS,
   PER_PAGE,
 } from "@/shared/config/github"
-import { logger } from "@/shared/lib/logger"
+import { MSG, MSG_TPL } from "@/shared/config/messages"
+import { createRequestLogger } from "@/shared/lib/logger"
 
 import type {
   SearchRepositoriesResponse,
@@ -41,35 +45,27 @@ export async function searchRepositories(params: {
   sort: SortOption
   page: number
 }): Promise<SearchRepositoriesResponse> {
+  const log = await createRequestLogger()
   const { q, sort, page } = params
   const sortParam = sort === "best match" ? "" : `&sort=${sort}&order=desc`
   const url = `${GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(q)}&per_page=${PER_PAGE}&page=${page}${sortParam}`
 
   const res = await fetch(url, {
     headers: GITHUB_API_HEADERS,
-    next: { revalidate: 30 },
+    next: { revalidate: 30 }, // req-009-001 — ISR 30秒キャッシュ
   })
 
   if (res.status === 403) {
-    logger.warn({ url, status: 403 }, "GitHub API レート制限")
-    throw new GitHubApiError(
-      "APIレート制限に達しました。しばらくしてからお試しください。",
-      403
-    )
+    log.warn({ url, status: 403 }, "GitHub API レート制限") // req-005-004, req-010-006
+    throw new GitHubApiError(MSG["MSG-201"], 403)
   }
   if (res.status === 422) {
-    logger.warn({ url, status: 422 }, "GitHub API 無効なクエリ")
-    throw new GitHubApiError(
-      "検索クエリが無効です。別のキーワードをお試しください。",
-      422
-    )
+    log.warn({ url, status: 422 }, "GitHub API 無効なクエリ") // req-005-005, req-010-006
+    throw new GitHubApiError(MSG["MSG-202"], 422)
   }
   if (!res.ok) {
-    logger.error({ url, status: res.status }, "GitHub API エラー")
-    throw new GitHubApiError(
-      `GitHub APIエラーが発生しました（${res.status}）`,
-      res.status
-    )
+    log.error({ url, status: res.status }, "GitHub API エラー") // req-005-003, req-010-005
+    throw new GitHubApiError(MSG_TPL["MSG-203"](res.status), res.status)
   }
 
   return res.json() as Promise<SearchRepositoriesResponse>
@@ -86,23 +82,21 @@ export async function getRepository(
   owner: string,
   repo: string
 ): Promise<Repository> {
+  const log = await createRequestLogger()
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`
 
   const res = await fetch(url, {
     headers: GITHUB_API_HEADERS,
-    next: { revalidate: 60 },
+    next: { revalidate: 60 }, // req-009-002 — ISR 60秒キャッシュ
   })
 
   if (res.status === 404) {
-    logger.info({ url, status: 404 }, "リポジトリが見つかりません")
-    throw new GitHubApiError("リポジトリが見つかりませんでした。", 404)
+    log.info({ url, status: 404 }, "リポジトリが見つかりません")
+    throw new GitHubApiError(MSG["MSG-102"], 404)
   }
   if (!res.ok) {
-    logger.error({ url, status: res.status }, "リポジトリ取得エラー")
-    throw new GitHubApiError(
-      `リポジトリ情報の取得に失敗しました（${res.status}）`,
-      res.status
-    )
+    log.error({ url, status: res.status }, "リポジトリ取得エラー")
+    throw new GitHubApiError(MSG_TPL["MSG-204"](res.status), res.status)
   }
 
   return res.json() as Promise<Repository>

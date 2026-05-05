@@ -41,6 +41,34 @@ Server Component をデフォルト、`"use client"` は必要箇所に最小限
 - 要件: `req-{nnn}-{domain}`（例: `req-001-search`）
 - Gherkin: `uc-{nnn}-{domain}`（例: `uc-001-search-success`）
 
+#### コードへの紐づけ方法
+
+| 場所 | 書き方 | 用途 |
+| --- | --- | --- |
+| ファイル先頭 JSDoc | `@see req-XXX, uc-XXX` | そのファイルが実装する要件・シナリオを宣言 |
+| 特定の実装行 | `// req-XXX — 理由` | 仕様上重要な1行（検証ロジック・セキュリティ制約等）に限定 |
+| テスト名 | `test("uc-XXX: ...")` | Gherkin シナリオと 1対1 対応させる |
+
+```typescript
+/**
+ * @file GitHub API クライアント
+ * @see req-001-006, req-001-015, req-008-007, req-009-001
+ * @see uc-001-001, uc-001-002, uc-005-001
+ */
+import "server-only" // req-001-015, req-008-007 — クライアントバンドルへの混入を防ぐ
+
+const res = await fetch(url, {
+  next: { revalidate: 30 }, // req-009-001 — ISR 30秒キャッシュ
+})
+```
+
+```typescript
+// テスト命名
+test("uc-001-001: キーワード検索で結果一覧が表示される", async () => { ... })
+```
+
+**粒度の判断基準**: `@see` はファイル・関数単位で「カバーしている仕様群」を示す。インライン `// req-XXX` は「なぜこう書くか」が仕様から自明でない行のみ付ける。自明な行は過剰になるため省略してよい。
+
 ### 2.7 言語規約
 
 ドキュメント・コミットメッセージ・UI・JSDoc は **日本語**。
@@ -69,18 +97,29 @@ Server Component をデフォルト、`"use client"` は必要箇所に最小限
 
 ### アーキテクチャ：FSD
 
-`app` / `features` / `entities` / `shared` の4層。**上位→下位の一方向依存のみ**。同レイヤー間のクロスインポートは禁止。
+`app` / `widgets` / `features` / `entities` / `shared` の5層。**上位→下位の一方向依存のみ**。同レイヤー間のクロスインポートは禁止。
+
+| 層 | 役割 |
+| --- | --- |
+| `app` | Next.js App Router。ルーティング・レイアウト・ページ |
+| `widgets` | 複数 features / entities を組み合わせた表示単位（リスト＋ページネーション等） |
+| `features` | ユーザー操作・ユースケース（検索フォーム・ソートセレクタ等） |
+| `entities` | ドメインモデル・API クライアント・エンティティ UI |
+| `shared` | 汎用ユーティリティ・UI 基盤（shadcn/ui コンポーネント、設定、型） |
 
 ### ディレクトリ構成
-
-> shadcn/ui スキャフォールド段階。FSD 層は機能実装に合わせて順次導入する。
 
 ```txt
 .
 ├── app/                        # Next.js App Router（ルーティング・レイアウト）
-├── components/                 # shadcn/ui コンポーネント置き場
-├── hooks/                      # React カスタムフック
-├── lib/                        # 汎用ユーティリティ
+├── widgets/                    # FSD: widgets 層
+├── features/                   # FSD: features 層
+├── entities/                   # FSD: entities 層
+├── shared/                     # FSD: shared 層
+│   ├── config/                 # 定数・環境変数
+│   ├── lib/                    # 汎用ユーティリティ・ロガー
+│   ├── types/                  # 共有型定義
+│   └── ui/                     # shadcn/ui コンポーネント
 ├── public/                     # 静的ファイル（robots.txt 等）
 ├── tests/
 │   ├── e2e/                    # Playwright E2E テスト（*.spec.ts）
@@ -145,7 +184,9 @@ Feature: リポジトリ検索 (req-001-search)
 ```typescript
 /**
  * @file GitHub API クライアント
- * @see {@link https://github.com/[owner]/[repo]/discussions} ADR カテゴリ（GitHub Discussions）
+ * @see req-001-006, req-001-015, req-008-007, req-009-001  ← 実装する仕様 ID
+ * @see uc-001-001, uc-005-001                              ← 対応するシナリオ ID
+ * @see {@link https://github.com/[owner]/[repo]/discussions} ADR カテゴリ
  */
 
 /**

@@ -6,7 +6,11 @@ import { AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { useEffect } from "react"
 
+import { LBL } from "@/shared/config/labels"
+import { MSG } from "@/shared/config/messages"
 import { Button } from "@/shared/ui/button"
+
+import { reportClientError } from "./actions"
 
 interface ErrorProps {
   error: Error & { digest?: string }
@@ -24,7 +28,7 @@ interface ErrorProps {
  */
 export default function RepoError({ error, reset }: ErrorProps) {
   useEffect(() => {
-    console.error("[RepoError]", error)
+    reportClientError(error.message, error.digest)
   }, [error])
 
   return (
@@ -33,17 +37,20 @@ export default function RepoError({ error, reset }: ErrorProps) {
         <AlertTriangle className="h-10 w-10 text-destructive" />
         <div>
           <h2 className="text-lg font-semibold text-destructive">
-            リポジトリの取得に失敗しました
+            {MSG["MSG-101"]}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {error.message || "予期しないエラーが発生しました"}
+            {error.message || MSG["MSG-C001"]}
           </p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={reset}>
-            再試行
+            {LBL["LBL-C001"]}
           </Button>
-          <Button variant="ghost" render={<Link href="/">検索に戻る</Link>} />
+          <Button
+            variant="ghost"
+            render={<Link href="/">{LBL["LBL-C003"]}</Link>}
+          />
         </div>
       </div>
     </div>
