@@ -21,6 +21,34 @@ import type {
   SortOption,
 } from "../model/types"
 
+/**
+ * @internal URL 構築ロジック（テスト用）
+ * @param params - 検索パラメータ
+ * @param params.q - 検索キーワード
+ * @param params.sort - ソート順
+ * @param params.page - ページ番号
+ * @returns 構築された URL
+ */
+export function buildSearchUrl(params: {
+  q: string
+  sort: SortOption
+  page: number
+}): string {
+  const { q, sort, page } = params
+  const sortParam = sort === "best match" ? "" : `&sort=${sort}&order=desc`
+  return `${GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(q)}&per_page=${PER_PAGE}&page=${page}${sortParam}`
+}
+
+/**
+ * @internal URL 構築ロジック（テスト用）
+ * @param owner - オーナー名
+ * @param repo - リポジトリ名
+ * @returns 構築された URL
+ */
+export function buildRepoUrl(owner: string, repo: string): string {
+  return `${GITHUB_API_BASE}/repos/${owner}/${repo}`
+}
+
 export class GitHubApiError extends Error {
   constructor(
     message: string,
@@ -46,9 +74,7 @@ export async function searchRepositories(params: {
   page: number
 }): Promise<SearchRepositoriesResponse> {
   const log = await createRequestLogger()
-  const { q, sort, page } = params
-  const sortParam = sort === "best match" ? "" : `&sort=${sort}&order=desc`
-  const url = `${GITHUB_API_BASE}/search/repositories?q=${encodeURIComponent(q)}&per_page=${PER_PAGE}&page=${page}${sortParam}`
+  const url = buildSearchUrl(params)
 
   const res = await fetch(url, {
     headers: GITHUB_API_HEADERS,
@@ -83,7 +109,7 @@ export async function getRepository(
   repo: string
 ): Promise<Repository> {
   const log = await createRequestLogger()
-  const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`
+  const url = buildRepoUrl(owner, repo)
 
   const res = await fetch(url, {
     headers: GITHUB_API_HEADERS,

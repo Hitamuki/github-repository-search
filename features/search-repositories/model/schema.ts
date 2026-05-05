@@ -22,18 +22,18 @@ export const SORT_OPTIONS = [
 export const searchQuerySchema = z.object({
   q: z
     .string()
+    .trim()
     .min(QUERY_MIN_LENGTH, MSG["MSG-001"])
-    .max(QUERY_MAX_LENGTH, MSG["MSG-002"])
-    .trim(),
+    .max(QUERY_MAX_LENGTH, MSG["MSG-002"]),
 })
 
-/** URL クエリパラメータのバリデーションスキーマ（req-004-001, req-007-001, req-007-007） */
+/** URL クエリパラメータのバリデーションスキーマ（req-004-001, req-007-001, req-007-007, req-004-011, req-004-014） */
 export const searchParamsSchema = z.object({
-  q: z.string().trim().default(""),
+  q: z.string().trim().catch(""),
   sort: z
     .enum(["best match", "stars", "forks", "updated"])
-    .default("best match"),
-  page: z.coerce.number().int().min(1).max(MAX_PAGES).default(1),
+    .catch("best match"),
+  page: z.coerce.number().int().min(1).max(MAX_PAGES).catch(1),
 })
 
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>
