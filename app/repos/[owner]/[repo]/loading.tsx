@@ -9,7 +9,13 @@ import { Skeleton } from "@/shared/ui/skeleton"
  */
 export default function RepoLoading() {
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6">
+    // req-006-003 — aria-busy でスクリーンリーダーに読み込み中を通知
+    <div
+      data-testid="repository-detail-skeleton"
+      aria-busy="true"
+      aria-label="読み込み中"
+      className="mx-auto max-w-3xl space-y-5 px-4 py-6"
+    >
       <div className="flex gap-4 rounded-xl border bg-card p-5">
         <Skeleton className="h-16 w-16 shrink-0 rounded-xl" />
         <div className="flex-1 space-y-2.5">

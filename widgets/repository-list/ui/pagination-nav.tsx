@@ -79,14 +79,14 @@ export function PaginationNav({
           <ChevronLeft className="h-4 w-4" />
         </Link>
       ) : (
-        <span
-          className={cn(
-            btnBase,
-            "pointer-events-none bg-background opacity-40"
-          )}
+        // req-006-006 — disabled button でスクリーンリーダーに無効状態を伝える
+        <button
+          disabled
+          aria-label={LBL["LBL-006"]}
+          className={cn(btnBase, "bg-background opacity-40")}
         >
           <ChevronLeft className="h-4 w-4" />
-        </span>
+        </button>
       )}
 
       {pages[0] > 1 && (
@@ -149,14 +149,14 @@ export function PaginationNav({
           <ChevronRight className="h-4 w-4" />
         </Link>
       ) : (
-        <span
-          className={cn(
-            btnBase,
-            "pointer-events-none bg-background opacity-40"
-          )}
+        // req-006-006 — disabled button でスクリーンリーダーに無効状態を伝える
+        <button
+          disabled
+          aria-label={LBL["LBL-007"]}
+          className={cn(btnBase, "bg-background opacity-40")}
         >
           <ChevronRight className="h-4 w-4" />
-        </span>
+        </button>
       )}
     </nav>
   )

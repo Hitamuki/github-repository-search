@@ -10,7 +10,13 @@ import { Skeleton } from "@/shared/ui/skeleton"
  */
 export function RepositoryListSkeleton() {
   return (
-    <div className="space-y-4">
+    // req-006-003 — aria-busy でスクリーンリーダーに読み込み中を通知
+    <div
+      data-testid="repository-list-skeleton"
+      aria-busy="true"
+      aria-label="読み込み中"
+      className="space-y-4"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Skeleton className="h-5 w-60" />
         <div className="flex gap-1.5">

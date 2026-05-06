@@ -5,9 +5,11 @@
  * @see uc-001-search, uc-002-results, uc-004-pagination, uc-007-sort
  */
 import { Suspense } from "react"
+import { redirect } from "next/navigation"
 
 import { SearchForm, searchParamsSchema } from "@/features/search-repositories"
 import { APP_NAME } from "@/shared/config/app"
+import { MAX_PAGES } from "@/shared/config/github"
 import { LBL } from "@/shared/config/labels"
 import {
   RepositoryList,
@@ -44,6 +46,18 @@ export async function generateMetadata({
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const rawParams = await searchParams
+
+  // req-004-011 — page が MAX_PAGES を超えるとき MAX_PAGES へリダイレクト
+  const rawPage =
+    typeof rawParams.page === "string" ? parseInt(rawParams.page, 10) : NaN
+  if (!isNaN(rawPage) && rawPage > MAX_PAGES) {
+    const q = typeof rawParams.q === "string" ? rawParams.q : ""
+    const sort = typeof rawParams.sort === "string" ? rawParams.sort : ""
+    const params = new URLSearchParams({ q, page: String(MAX_PAGES) })
+    if (sort && sort !== "best match") params.set("sort", sort)
+    redirect(`/?${params.toString()}`)
+  }
+
   const parseResult = searchParamsSchema.safeParse({
     q: typeof rawParams.q === "string" ? rawParams.q : "",
     sort: typeof rawParams.sort === "string" ? rawParams.sort : "best match",

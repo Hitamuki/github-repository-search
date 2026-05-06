@@ -50,7 +50,11 @@ export async function RepositoryList({ q, sort, page }: RepositoryListProps) {
 
   if (!result.ok) {
     return (
-      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+      // req-006-004 — スクリーンリーダーへの即時通知
+      <div
+        role="alert"
+        className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+      >
         <p className="font-semibold text-destructive">{result.message}</p>
       </div>
     )
@@ -79,7 +83,8 @@ export async function RepositoryList({ q, sort, page }: RepositoryListProps) {
         currentSort={sort}
       />
 
-      <ul className="space-y-2" aria-label={LBL["LBL-005"]}>
+      {/* tabIndex={-1}: プログラム的フォーカスを受け取れるようにする（uc-006-009） */}
+      <ul tabIndex={-1} className="space-y-2 outline-none" aria-label={LBL["LBL-005"]}>
         {data.items.map((repo) => (
           <li key={repo.id}>
             <RepositoryCard repo={repo} searchParams={searchParamsObj} />

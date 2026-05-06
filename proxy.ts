@@ -13,9 +13,12 @@ export function proxy(request: NextRequest): NextResponse {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-request-id", requestId)
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: requestHeaders },
   })
+  // uc-010-001〜003 — レスポンスヘッダーにも付与してクライアントから検証可能にする
+  response.headers.set("x-request-id", requestId)
+  return response
 }
 
 export const config = {

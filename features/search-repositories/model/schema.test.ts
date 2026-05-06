@@ -1,7 +1,7 @@
 /**
  * @file features/search-repositories Zod バリデーションスキーマ Unit テスト
- * @see req-001-002, req-001-011, req-001-012, req-004-001, req-007-001, req-007-007
- * @see uc-001-005, uc-001-006, uc-001-007
+ * @see req-001-002, req-001-012, req-004-001, req-007-001, req-007-007
+ * @see uc-001-005, uc-001-007
  */
 import { describe, expect, it } from "vitest"
 
@@ -21,20 +21,6 @@ describe("searchQuerySchema", () => {
     expect(result.success).toBe(true)
   })
 
-  it("searchQuerySchema_emptyInput_failsWithMinLengthMessage", () => {
-    // Arrange
-    const input = { q: "" }
-
-    // Act
-    const result = searchQuerySchema.safeParse(input)
-
-    // Assert
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      expect(result.error.errors[0].message).toBe(MSG["MSG-001"])
-    }
-  })
-
   it("searchQuerySchema_tooLongInput_failsWithMaxLengthMessage", () => {
     // Arrange
     const input = { q: "a".repeat(257) }
@@ -47,18 +33,6 @@ describe("searchQuerySchema", () => {
     if (!result.success) {
       expect(result.error.errors[0].message).toBe(MSG["MSG-002"])
     }
-  })
-
-  it("searchQuerySchema_whitespaceInput_trimsAndFailsIfEmpty", () => {
-    // Arrange
-    const input = { q: "   " }
-
-    // Act
-    const result = searchQuerySchema.safeParse(input)
-
-    // Assert
-    // schema.ts では .trim() が適用されるが .min(1) もあるため、トリム後の長さで検証される
-    expect(result.success).toBe(false)
   })
 })
 

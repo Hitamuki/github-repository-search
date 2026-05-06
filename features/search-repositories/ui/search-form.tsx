@@ -8,7 +8,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Search, Loader2 } from "lucide-react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { useCallback, useTransition } from "react"
+import { useCallback, useEffect, useRef, useTransition } from "react"
 import { useForm, useWatch } from "react-hook-form"
 
 import { LBL } from "@/shared/config/labels"
@@ -37,6 +37,16 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+
+  // uc-006-009 — 検索完了後にフォーカスを検索結果一覧の先頭へ移動する
+  const prevPendingRef = useRef(false)
+  useEffect(() => {
+    if (prevPendingRef.current && !isPending) {
+      const list = document.querySelector<HTMLElement>('[aria-label="検索結果"]')
+      list?.focus()
+    }
+    prevPendingRef.current = isPending
+  }, [isPending])
 
   const {
     register,
@@ -75,6 +85,7 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
           <Input
             {...register("q")}
             placeholder={LBL["LBL-001"]}
+            aria-label={LBL["LBL-001"]}
             className={cn(
               "pl-9",
               errors.q && "border-destructive focus-visible:ring-destructive"

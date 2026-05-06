@@ -34,16 +34,24 @@ export function ResultsHeader({
 }: ResultsHeaderProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-muted-foreground">
-        約{" "}
-        <strong className="font-semibold text-foreground">
-          {totalCount.toLocaleString("ja-JP")}
-        </strong>{" "}
-        件のリポジトリが見つかりました
-        <span className="ml-1.5 text-xs text-muted-foreground/70">
-          ({currentPage}/{totalPages} ページ)
-        </span>
-      </p>
+      <div>
+        <p className="text-sm text-muted-foreground">
+          約{" "}
+          <strong className="font-semibold text-foreground">
+            {totalCount.toLocaleString("ja-JP")}
+          </strong>{" "}
+          件のリポジトリが見つかりました
+          <span className="ml-1.5 text-xs text-muted-foreground">
+            ({currentPage}/{totalPages} ページ)
+          </span>
+        </p>
+        {/* req-004-013 — GitHub API は1000件を超える結果を返さないため注記を表示 */}
+        {totalCount > 1000 && (
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            GitHub API の制約により、表示できるのは上位1000件までです
+          </p>
+        )}
+      </div>
       <SortSelector currentSort={currentSort} />
     </div>
   )
