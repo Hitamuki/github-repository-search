@@ -18,6 +18,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
+    "audit": "pnpm audit",
     "dev:log": "next dev --turbopack 2>&1 | pino-pretty",
     "dev:mobile": "next dev --turbopack --hostname 0.0.0.0"
   },

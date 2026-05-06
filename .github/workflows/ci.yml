@@ -1,0 +1,223 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11.0.4'
+
+jobs:
+  # ─── 差分検出 ────────────────────────────────────────────────────
+  detect-changes:
+    name: 差分検出
+    runs-on: ubuntu-latest
+    outputs:
+      ts-changed: ${{ steps.filter.outputs.ts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ts:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'tsconfig.json'
+              - 'eslint.config.mjs'
+              - '.prettierrc'
+              - 'vitest.config.ts'
+              - 'playwright.config.ts'
+              - 'next.config.mjs'
+
+  # ─── 依存セキュリティ監査 ────────────────────────────────────────
+  audit:
+    name: 依存セキュリティ監査 (pnpm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: セキュリティ監査
+        run: pnpm audit
+
+  # ─── 型検査 ──────────────────────────────────────────────────────
+  typecheck:
+    name: 型検査 (tsc)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ts-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: 依存インストール
+        run: pnpm install --frozen-lockfile
+      - name: TypeScript 型検査
+        run: pnpm typecheck
+
+  # ─── フォーマット検査 ─────────────────────────────────────────────
+  prettier:
+    name: フォーマット検査 (Prettier)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ts-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: 依存インストール
+        run: pnpm install --frozen-lockfile
+      - name: 差分 TS/TSX ファイル取得
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            BASE="HEAD~1"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          FILES=$(git diff --name-only --diff-filter=ACM "$BASE" HEAD | grep -E '\.(ts|tsx)$' | tr '\n' ' ')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+      - name: Prettier フォーマット検査
+        run: |
+          FILES="${{ steps.changed.outputs.files }}"
+          if [ -n "$FILES" ]; then
+            pnpm exec prettier --check $FILES
+          else
+            echo "変更された TS/TSX ファイルなし"
+          fi
+
+  # ─── 静的解析 ─────────────────────────────────────────────────────
+  eslint:
+    name: 静的解析 (ESLint)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ts-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: 依存インストール
+        run: pnpm install --frozen-lockfile
+      - name: 差分 TS/TSX ファイル取得
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            BASE="HEAD~1"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          FILES=$(git diff --name-only --diff-filter=ACM "$BASE" HEAD | grep -E '\.(ts|tsx)$' | tr '\n' ' ')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+      - name: ESLint 静的解析
+        run: |
+          FILES="${{ steps.changed.outputs.files }}"
+          if [ -n "$FILES" ]; then
+            pnpm exec eslint $FILES
+          else
+            echo "変更された TS/TSX ファイルなし"
+          fi
+
+  # ─── ユニット・統合テスト ─────────────────────────────────────────
+  vitest:
+    name: ユニット・統合テスト (Vitest)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ts-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: 依存インストール
+        run: pnpm install --frozen-lockfile
+      - name: Vitest（差分関連テスト）
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            BASE="HEAD~1"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          pnpm exec vitest run --changed "$BASE"
+
+  # ─── E2E テスト ───────────────────────────────────────────────────
+  e2e:
+    name: E2E テスト (Playwright)
+    needs: [detect-changes, vitest]
+    if: needs.detect-changes.outputs.ts-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: 依存インストール
+        run: pnpm install --frozen-lockfile
+      - name: Playwright ブラウザキャッシュ
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Playwright ブラウザインストール
+        run: pnpm playwright install --with-deps chromium
+      - name: E2E テスト実行
+        run: pnpm test:e2e
+        env:
+          CI: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: テスト結果アップロード（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
