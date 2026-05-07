@@ -26,6 +26,7 @@ GitHub Search API を使ってリポジトリを検索・詳細表示する Web 
       - [詳細画面](#詳細画面)
     - [セキュリティ](#セキュリティ)
     - [アクセシビリティ](#アクセシビリティ)
+    - [コード品質](#コード品質)
   - [Trade-offs](#trade-offs)
     - [URL 駆動の真 SSR を選んだ理由](#url-駆動の真-ssr-を選んだ理由)
     - [やらなかったこと](#やらなかったこと)
@@ -201,6 +202,12 @@ WCAG 2.1 AA 準拠を目標。
 | エラーメッセージ   | `aria-describedby` でフォームと紐付け                  |
 | ランドマーク       | `<main>`、`<nav>`、`<form role="search">` の適切な使用 |
 | 画像               | オーナーアイコンに `alt="<owner>のアイコン"`           |
+
+### コード品質
+
+React Doctorのスコアです。
+
+![React Doctor](assets/images/ReactDoctor.png)
 
 ## Trade-offs
 
