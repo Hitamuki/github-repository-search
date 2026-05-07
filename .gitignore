@@ -47,3 +47,6 @@ next-env.d.ts
 # OWASP ZAP セキュリティスキャン結果（生成物）
 /tests/security/reports/*.html
 /tests/security/reports/*.json
+
+# Performance Lighthouse レポート（生成物）
+/tests/performance/reports/*.html
