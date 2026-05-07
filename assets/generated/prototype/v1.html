@@ -1,0 +1,889 @@
+<!DOCTYPE html><html lang="ja"><head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub リポジトリ検索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: oklch(0.98 0.005 240);
+    --surface: #ffffff;
+    --border: oklch(0.90 0.008 240);
+    --border-focus: oklch(0.55 0.18 245);
+    --text-primary: oklch(0.18 0.01 240);
+    --text-secondary: oklch(0.45 0.01 240);
+    --text-muted: oklch(0.62 0.008 240);
+    --accent: oklch(0.55 0.18 245);
+    --accent-hover: oklch(0.48 0.18 245);
+    --accent-surface: oklch(0.96 0.025 245);
+    --danger: oklch(0.55 0.18 25);
+    --danger-surface: oklch(0.97 0.015 25);
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow-sm: 0 1px 3px oklch(0.18 0.01 240 / 0.08), 0 1px 2px oklch(0.18 0.01 240 / 0.05);
+    --shadow-md: 0 4px 12px oklch(0.18 0.01 240 / 0.10), 0 2px 4px oklch(0.18 0.01 240 / 0.06);
+    --font: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+  }
+  html { font-family: var(--font); background: var(--bg); color: var(--text-primary); font-size: 14px; line-height: 1.6; }
+  body { min-height: 100vh; }
+  #root { min-height: 100vh; }
+
+  /* --- Scrollbar --- */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* --- Skeleton animation --- */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--border) 25%, oklch(0.95 0.005 240) 50%, var(--border) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  /* --- Fade-in --- */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.22s ease-out both; }
+
+  /* --- Page transition --- */
+  @keyframes slideIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+  .slide-in { animation: slideIn 0.24s ease-out both; }
+</style>
+</head>
+<body>
+<div id="root"><div style="min-height: 100vh; display: flex; flex-direction: column;"><header style="position: sticky; top: 0px; z-index: 100; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);"><div style="max-width: 760px; margin: 0px auto; padding: 0px 20px; height: 58px; display: flex; align-items: center; gap: 14px;"><div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg><span style="font-weight: 700; font-size: 15px; letter-spacing: -0.3px;"><span data-om-text="txt:/Inline Babel script:15388:15395" class="__om-t">リポジトリ検索</span></span></div><form style="flex: 1 1 0%; display: flex; gap: 8px;"><div style="flex: 1 1 0%; position: relative;"><input placeholder="リポジトリ名を入力してください" data-om-text-attrs="{&quot;placeholder&quot;:&quot;txt:/Inline Babel script:15843:15860&quot;}" value="" style="width: 100%; height: 36px; padding: 0px 12px 0px 36px; border-color: var(--border); border-top-style: ; border-top-width: ; border-right-style: ; border-right-width: ; border-bottom-style: ; border-bottom-width: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); color: var(--text-primary); font-family: var(--font); outline: none; transition: border-color 0.15s;"><span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"></circle><line x1="13" y1="13" x2="18" y2="18"></line></svg></span></div><button type="submit" style="height: 36px; padding: 0px 16px; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: var(--radius-sm); background: var(--accent); color: rgb(255, 255, 255); font-weight: 600; font-size: 13px; cursor: pointer; font-family: var(--font); transition: background 0.15s; white-space: nowrap;">検索</button></form></div></header><main style="flex: 1 1 0%; max-width: 760px; width: 100%; margin: 0px auto; padding: 20px 20px 48px;"><div class="fade-in" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;"><p style="font-size: 13px; color: var(--text-secondary);"><span data-om-text="txt:/Inline Babel script:18926:18927" class="__om-t">約 </span><strong style="color: var(--text-primary);">59,730,291</strong><span data-om-text="txt:/Inline Babel script:19032:19047" class="__om-t"> 件のリポジトリが見つかりました</span><span style="color: var(--text-muted); margin-left: 6px; font-size: 12px;"><span data-om-text="txt:/Inline Babel script:19136:19137" class="__om-t">（</span>1<span data-om-text="txt:/Inline Babel script:19152:19153" class="__om-t">/</span>20<span data-om-text="txt:/Inline Babel script:19166:19170" class="__om-t"> ページ）</span></span></p><div style="display: flex; gap: 4px;"><button style="padding: 4px 10px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--surface); color: var(--text-secondary); cursor: pointer; font-family: var(--font); transition: 0.15s;">関連度</button><button style="padding: 4px 10px; border: 1.5px solid var(--accent); border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--accent-surface); color: var(--accent); cursor: pointer; font-family: var(--font); transition: 0.15s;">Star数</button><button style="padding: 4px 10px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--surface); color: var(--text-secondary); cursor: pointer; font-family: var(--font); transition: 0.15s;">Fork数</button><button style="padding: 4px 10px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 12px; font-weight: 500; background: var(--surface); color: var(--text-secondary); cursor: pointer; font-family: var(--font); transition: 0.15s;">更新日</button></div></div><div style="display: flex; flex-direction: column; gap: 8px;"><div class="fade-in" style="animation-delay: 0ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/150330?v=4" alt="getify" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">getify/You-Dont-Know-JS</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A book series (2 published editions) on the JS language.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 184.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 20ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/9919?v=4" alt="github" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">github/gitignore</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A collection of useful .gitignore templates</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 173.7k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 40ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/2058167?v=4" alt="jlevy" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">jlevy/the-art-of-command-line</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Master the command line, in one page</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 160.8k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 60ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/79589310?v=4" alt="yt-dlp" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">yt-dlp/yt-dlp</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A feature-rich command-line audio/video downloader</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 160.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 80ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/32372333?v=4" alt="axios" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">axios/axios</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Promise based HTTP client for the browser and node.js</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 109.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 100ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/7857126?v=4" alt="forrestchang" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">forrestchang/andrej-karpathy-skills</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 108.9k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 120ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/31396011?v=4" alt="Shubhamsaboo" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Shubhamsaboo/awesome-llm-apps</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">100+ AI Agent &amp; RAG apps you can actually run — clone, customize, ship.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 108.6k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 140ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/54536011?v=4" alt="tauri-apps" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">tauri-apps/tauri</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Build smaller, faster, and more secure desktop and mobile applications with a web frontend.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Rust</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 106.2k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 160ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/69631?v=4" alt="facebook" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">facebook/create-react-app</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Set up a modern web app by running one command.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 103.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 180ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/67109815?v=4" alt="tailwindlabs" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">tailwindlabs/tailwindcss</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A utility-first CSS framework for rapid UI development.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 94.8k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 200ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/6154722?v=4" alt="microsoft" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">microsoft/playwright</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API. </p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 87.9k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 220ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/57169982?v=4" alt="mermaid-js" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">mermaid-js/mermaid</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Generation of diagrams like flowcharts or sequence diagrams from text in a similar manner as markdown</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 87.8k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 240ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/34022344?v=4" alt="DopplerHQ" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">DopplerHQ/awesome-interview-questions</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--border); color: var(--text-secondary);"><span data-om-text="txt:/Inline Babel script:8014:8022" class="__om-t">Archived</span></span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">:octocat: A curated awesome list of lists of interview questions. Feel free to contribute! :mortar_board: </p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 82.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 260ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/700826?v=4" alt="junegunn" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">junegunn/fzf</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">:cherry_blossom: A command-line fuzzy finder</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Go</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 80.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 280ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/136984999?v=4" alt="vllm-project" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">vllm-project/vllm</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A high-throughput and memory-efficient inference and serving engine for LLMs</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 78.9k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 300ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/12152583?v=4" alt="swisskyrepo" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">swisskyrepo/PayloadsAllTheThings</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A list of useful payloads and bypass for Web Application Security and Pentest/CTF</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 77.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 320ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/102670180?v=4" alt="nomic-ai" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">nomic-ai/gpt4all</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">GPT4All: Run Local LLMs on Any Device. Open-source and available for commercial use.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">C++</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 77.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 340ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/1505683?v=4" alt="FortAwesome" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">FortAwesome/Font-Awesome</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">The iconic SVG, font, and CSS toolkit</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 76.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 360ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/13077039?v=4" alt="sdmg15" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">sdmg15/Best-websites-a-programmer-should-visit</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--border); color: var(--text-secondary);"><span data-om-text="txt:/Inline Babel script:8014:8022" class="__om-t">Archived</span></span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">:link: Some useful websites for programmers.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 76.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 380ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/30233788?v=4" alt="CompVis" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">CompVis/stable-diffusion</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A latent text-to-image diffusion model</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Jupyter Notebook</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 73.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 400ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/47359?v=4" alt="apache" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">apache/superset</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Apache Superset is a Data Visualization and Data Exploration Platform</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 72.7k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 420ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/50654?v=4" alt="danielmiessler" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">danielmiessler/SecLists</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">SecLists is the security tester's companion. It's a collection of multiple types of lists used during security assessments, collected in one place. List types include usernames, passwords, URLs, sensitive data patterns, fuzzing payloads, web shells, and many more.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">PHP</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 70.7k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 440ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/3813618?v=4" alt="nektos" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">nektos/act</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Run your GitHub Actions locally 🚀</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Go</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 70.1k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 460ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/11298292?v=4" alt="NationalSecurityAgency" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NationalSecurityAgency/ghidra</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Ghidra is a software reverse engineering (SRE) framework</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Java</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 68.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 480ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/2200898?v=4" alt="chrislgarry" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">chrislgarry/Apollo-11</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Original Apollo 11 Guidance Computer (AGC) source code for the command and lunar modules.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Assembly</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 67.8k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 500ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/2105791?v=4" alt="webpack" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">webpack/webpack</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A bundler for javascript and friends. Packs many modules into a few bundled assets. Code Splitting allows for loading parts of the application on demand. Through "loaders", modules can be CommonJs, AMD, ES6 modules, CSS, Images, JSON, Coffeescript, LESS, ... and your custom stuff.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 65.8k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 520ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/170270?v=4" alt="sindresorhus" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">sindresorhus/awesome-nodejs</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">:zap: Delightful Node.js packages and resources [BECAUSE OF TOO MUCH SPAM AND LOW-QUALITY SUBMISSIONS, SUBMISSIONS ARE PAUSED UNTIL JULY]</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 65.6k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 540ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/29451794?v=4" alt="lydiahallie" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">lydiahallie/javascript-questions</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A long list of (advanced) JavaScript questions, and their explanations :sparkles:  </p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 65.3k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 560ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/12494079?v=4" alt="unclecode" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">unclecode/crawl4ai</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">🚀🤖 Crawl4AI: Open-source LLM Friendly Web Crawler &amp; Scraper. Don't be shy, join here: https://discord.gg/jP8KfhDhyN</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 65.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 580ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/28732122?v=4" alt="localstack" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">localstack/localstack</span><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--border); color: var(--text-secondary);"><span data-om-text="txt:/Inline Babel script:8014:8022" class="__om-t">Archived</span></span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">💻 A fully functional local AWS cloud stack. Develop and test your cloud &amp; Serverless apps offline</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 64.9k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 600ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/456674?v=4" alt="BurntSushi" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">BurntSushi/ripgrep</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">ripgrep recursively searches directories for a regex pattern while respecting your gitignore</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Rust</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 63.3k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 620ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/3006190?v=4" alt="shadowsocks" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">shadowsocks/shadowsocks-windows</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A C# port of shadowsocks</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">C#</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 59.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 640ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/44939412?v=4" alt="farion1231" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">farion1231/cc-switch</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A cross-platform desktop All-in-One assistant tool for Claude Code, Codex, OpenCode, openclaw &amp; Gemini CLI.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Rust</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 58.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 660ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/43250847?v=4" alt="meilisearch" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">meilisearch/meilisearch</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A lightning-fast search engine API bringing AI-powered hybrid search to your sites and applications.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Rust</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 57.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 680ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/129054828?v=4" alt="RVC-Boss" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">RVC-Boss/GPT-SoVITS</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">1 min voice data can also be used to train a good TTS model! (few shot voice cloning)</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 57.1k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 700ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/20820960?v=4" alt="rust-unofficial" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">rust-unofficial/awesome-rust</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A curated list of Rust code and resources.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Rust</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 57.1k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 720ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/1833474?v=4" alt="wasabeef" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">wasabeef/awesome-android-ui</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A curated list of awesome Android UI/UX libraries</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 56.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 740ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/25003669?v=4" alt="appwrite" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">appwrite/appwrite</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Appwrite® - complete cloud infrastructure for your web, mobile and AI apps. Including Auth, Databases, Storage, Functions, Messaging, Hosting, Realtime and more</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 56.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 760ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/50630501?v=4" alt="psf" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">psf/requests</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A simple, yet elegant, HTTP library.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Python</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 54.0k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 780ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/590471?v=4" alt="wagoodman" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">wagoodman/dive</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A tool for exploring each layer in a docker image</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Go</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 53.9k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 800ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/6128107?v=4" alt="vuejs" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">vuejs/core</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">🖖 Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 53.6k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 820ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/10835354?v=4" alt="WerWolv" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">WerWolv/ImHex</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">🔍 A Hex Editor for Reverse Engineers, Programmers and people who value their retinas when working at 3 AM.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">C++</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 53.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 840ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/996596?v=4" alt="koala73" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">koala73/worldmonitor</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Real-time global intelligence dashboard. AI-powered news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 53.3k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 860ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/5796209?v=4" alt="Semantic-Org" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Semantic-Org/Semantic-UI</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Semantic is a UI component framework based around useful principles from natural language.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 51.1k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 880ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/253398?v=4" alt="NARKOZ" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NARKOZ/hacker-scripts</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">Based on a true story</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 49.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 900ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/184931308?v=4" alt="AlistGo" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">AlistGo/alist</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">🗂️A file list/WebDAV program that supports multiple storages, powered by Gin and Solidjs. / 一个支持多存储的文件列表/WebDAV程序，使用 Gin 和 Solidjs。</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">Go</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 49.4k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 920ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/115727700?v=4" alt="makeplane" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">makeplane/plane</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">🔥🔥🔥 Open-source Jira, Linear, Monday, and ClickUp alternative. Plane is a modern project management platform to manage tasks, sprints, docs, and triage.</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">TypeScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 48.7k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 940ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/38487505?v=4" alt="algorithm-visualizer" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">algorithm-visualizer/algorithm-visualizer</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">:fireworks:Interactive Online Platform that Visualizes Algorithms from Code</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 48.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 960ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/9008063?v=4" alt="Asabeneh" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Asabeneh/30-Days-Of-JavaScript</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">30 days of JavaScript programming challenge is a step-by-step guide to learn JavaScript programming language in 30 days. This challenge may take more than 100 days,  please just follow your own pace. These videos may help too: https://www.youtube.com/channel/UC7PNRuno1rzYPb1xLa4yktw</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; background: var(--accent-surface); color: var(--accent);">JavaScript</span><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 46.3k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div><div class="fade-in" style="animation-delay: 980ms;"><div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: 0.15s; box-shadow: none;"><img src="https://avatars.githubusercontent.com/u/1547923?v=4" alt="lukasz-madon" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); object-fit: cover;"><div style="flex: 1 1 0%; min-width: 0px;"><div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;"><span style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">lukasz-madon/awesome-remote-job</span></div><p style="font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">A curated list of awesome remote jobs and resources. Inspired by https://github.com/vinta/awesome-python</p></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;"><span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 45.5k</span></div><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></div></div></div><div style="margin-top: 24px;"><div style="display: flex; align-items: center; justify-content: center; gap: 4px; padding-top: 8px;"><button disabled="" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--surface); color: var(--text-primary); font-family: var(--font); opacity: 0.4;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,3 5,8 10,13"></polyline></svg></button><button style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-color: var(--accent); border-top-style: ; border-top-width: ; border-right-style: ; border-right-width: ; border-bottom-style: ; border-bottom-width: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--accent); color: rgb(255, 255, 255); font-family: var(--font);">1</button><button style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-color: var(--border); border-top-style: ; border-top-width: ; border-right-style: ; border-right-width: ; border-bottom-style: ; border-bottom-width: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--surface); color: var(--text-primary); font-family: var(--font);">2</button><button style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border-color: var(--border); border-top-style: ; border-top-width: ; border-right-style: ; border-right-width: ; border-bottom-style: ; border-bottom-width: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--surface); color: var(--text-primary); font-family: var(--font);">3</button><span style="color: var(--text-muted); padding: 0px 4px;"><span data-om-text="txt:/Inline Babel script:10711:10712" class="__om-t">…</span></span><button style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--surface); color: var(--text-primary); font-family: var(--font);">20</button><button style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; background: var(--surface); color: var(--text-primary); font-family: var(--font); opacity: 1;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"></polyline></svg></button></div></div></main></div></div>
+<script type="text/babel" data-plugins="transform-react-jsx-source,om-src-id,om-text-extract" data-filename="inline-0">
+
+const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+/* ============================================================
+   CONSTANTS & TYPES
+   ============================================================ */
+const PER_PAGE = 50;
+const SORT_OPTIONS = [
+{ value: 'best match', label: '関連度' },
+{ value: 'stars', label: 'Star数' },
+{ value: 'forks', label: 'Fork数' },
+{ value: 'updated', label: '更新日' }];
+
+
+/* ============================================================
+   ZOD-LIKE VALIDATION (lightweight, browser-compatible)
+   ============================================================ */
+const validateSearchQuery = (q) => {
+  if (!q || typeof q !== 'string') return { ok: false, error: '検索キーワードを入力してください' };
+  const trimmed = q.trim();
+  if (trimmed.length === 0) return { ok: false, error: '検索キーワードを入力してください' };
+  if (trimmed.length > 256) return { ok: false, error: 'キーワードは256文字以内で入力してください' };
+  return { ok: true, value: trimmed };
+};
+
+/* ============================================================
+   GITHUB API — entities layer
+   ============================================================ */
+const githubApi = {
+  async searchRepositories({ q, sort, page }) {
+    const sortParam = sort === 'best match' ? '' : `&sort=${sort}&order=desc`;
+    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&per_page=${PER_PAGE}&page=${page}${sortParam}`;
+    const res = await fetch(url, {
+      headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+    });
+    if (res.status === 403) throw new Error('APIレート制限に達しました。しばらくしてからお試しください。');
+    if (res.status === 422) throw new Error('検索クエリが無効です。別のキーワードをお試しください。');
+    if (!res.ok) throw new Error(`GitHub API エラー (${res.status})`);
+    return res.json();
+  },
+  async getRepository(owner, repo) {
+    const url = `https://api.github.com/repos/${owner}/${repo}`;
+    const res = await fetch(url, {
+      headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+    });
+    if (!res.ok) throw new Error(`リポジトリ情報の取得に失敗しました (${res.status})`);
+    return res.json();
+  }
+};
+
+/* ============================================================
+   URL STATE SYNC — features layer
+   ============================================================ */
+function useUrlState() {
+  const getState = () => {
+    const p = new URLSearchParams(window.location.search);
+    return {
+      q: p.get('q') || '',
+      sort: p.get('sort') || 'best match',
+      page: parseInt(p.get('page') || '1', 10),
+      repo: p.get('repo') || '' // "owner/name"
+    };
+  };
+  const [state, setState] = useState(getState);
+
+  useEffect(() => {
+    const handler = () => setState(getState());
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
+  const push = useCallback((next) => {
+    const p = new URLSearchParams();
+    if (next.q) p.set('q', next.q);
+    if (next.sort && next.sort !== 'best match') p.set('sort', next.sort);
+    if (next.page && next.page !== 1) p.set('page', String(next.page));
+    if (next.repo) p.set('repo', next.repo);
+    const qs = p.toString();
+    window.history.pushState({}, '', qs ? `?${qs}` : window.location.pathname);
+    setState({ q: next.q || '', sort: next.sort || 'best match', page: next.page || 1, repo: next.repo || '' });
+  }, []);
+
+  return [state, push];
+}
+
+/* ============================================================
+   FORMAT HELPERS
+   ============================================================ */
+const fmt = (n) => {
+  if (n === null || n === undefined) return '−';
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+};
+const fmtDate = (s) => {
+  if (!s) return '−';
+  return new Date(s).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+/* ============================================================
+   DESIGN SYSTEM COMPONENTS
+   ============================================================ */
+
+/* --- Badge --- */
+function Badge({ children, color = 'default' }) {
+  const styles = {
+    default: { background: 'var(--border)', color: 'var(--text-secondary)' },
+    blue: { background: 'var(--accent-surface)', color: 'var(--accent)' },
+    green: { background: 'oklch(0.95 0.03 150)', color: 'oklch(0.40 0.12 150)' }
+  };
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      padding: '2px 8px', borderRadius: 99,
+      fontSize: 11, fontWeight: 600, letterSpacing: 0.3,
+      ...styles[color]
+    }}>{children}</span>);
+
+}
+
+/* --- IconButton --- */
+function IconButton({ onClick, title, children, active }) {
+  return (
+    <button
+      onClick={onClick} title={title}
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: 32, height: 32, border: 'none', borderRadius: var_radius,
+        background: active ? 'var(--accent-surface)' : 'transparent',
+        color: active ? 'var(--accent)' : 'var(--text-secondary)',
+        cursor: 'pointer', transition: 'all 0.15s'
+      }}
+      onMouseEnter={(e) => {if (!active) e.currentTarget.style.background = 'var(--bg)';}}
+      onMouseLeave={(e) => {if (!active) e.currentTarget.style.background = 'transparent';}}>
+      {children}</button>);
+
+}
+const var_radius = 'var(--radius-sm)';
+
+/* --- Divider --- */
+const Divider = () => <div style={{ height: 1, background: 'var(--border)', margin: '0 -1px' }} />;
+
+/* --- Skeleton --- */
+function Skel({ w, h = 16, r = 6 }) {
+  return <div className="skeleton" style={{ width: w, height: h, borderRadius: r }} />;
+}
+
+/* --- RepositoryCard skeleton --- */
+function RepoCardSkeleton() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 14,
+      padding: '14px 16px', background: 'var(--surface)',
+      border: '1px solid var(--border)', borderRadius: 'var(--radius)'
+    }}>
+      <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 8, flexShrink: 0 }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Skel w="55%" />
+        <Skel w="80%" h={12} />
+      </div>
+      <Skel w={48} h={20} r={99} />
+    </div>);
+
+}
+
+/* ============================================================
+   REPOSITORY CARD — widgets layer
+   ============================================================ */
+function RepositoryCard({ repo, onClick, animDelay = 0 }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      className="fade-in"
+      style={{ animationDelay: `${animDelay}ms` }}
+      onClick={() => onClick(repo)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}>
+      
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        padding: '14px 16px',
+        background: hover ? 'oklch(0.975 0.007 240)' : 'var(--surface)',
+        border: `1px solid ${hover ? 'var(--accent)' : 'var(--border)'}`,
+        borderRadius: 'var(--radius)',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        boxShadow: hover ? 'var(--shadow-sm)' : 'none'
+      }}>
+        {/* Owner Avatar */}
+        <img
+          src={repo.owner.avatar_url}
+          alt={repo.owner.login}
+          style={{ width: 40, height: 40, borderRadius: 8, flexShrink: 0, border: '1px solid var(--border)', objectFit: 'cover' }}
+          onError={(e) => {e.target.style.display = 'none';}} />
+        
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <span style={{ fontWeight: 600, fontSize: 14, color: hover ? 'var(--accent)' : 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {repo.full_name}
+            </span>
+            {repo.private && <Badge color="default">Private</Badge>}
+            {repo.archived && <Badge color="default">Archived</Badge>}
+          </div>
+          {repo.description &&
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+              {repo.description}
+            </p>
+          }
+        </div>
+        {/* Language + Stars */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+          {repo.language && <Badge color="blue">{repo.language}</Badge>}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
+            <StarIcon size={12} /> {fmt(repo.stargazers_count)}
+          </span>
+        </div>
+        {/* Chevron */}
+        <ChevronRightIcon size={16} color="var(--text-muted)" />
+      </div>
+    </div>);
+
+}
+
+/* ============================================================
+   PAGINATION — widgets layer
+   ============================================================ */
+function Pagination({ page, totalPages, onChange }) {
+  if (totalPages <= 1) return null;
+
+  const range = [];
+  const delta = 2;
+  for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) range.push(i);
+
+  const btnBase = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    minWidth: 36, height: 36, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+    fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s',
+    background: 'var(--surface)', color: 'var(--text-primary)', fontFamily: 'var(--font)'
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, paddingTop: 8 }}>
+      <button
+        style={{ ...btnBase, opacity: page <= 1 ? 0.4 : 1 }}
+        disabled={page <= 1}
+        onClick={() => onChange(page - 1)}>
+        
+        <ChevronLeftIcon size={15} />
+      </button>
+
+      {range[0] > 1 &&
+      <>
+          <button style={btnBase} onClick={() => onChange(1)}>1</button>
+          {range[0] > 2 && <span style={{ color: 'var(--text-muted)', padding: '0 4px' }}>…</span>}
+        </>
+      }
+
+      {range.map((p) =>
+      <button
+        key={p}
+        style={{ ...btnBase, background: p === page ? 'var(--accent)' : 'var(--surface)', color: p === page ? '#fff' : 'var(--text-primary)', borderColor: p === page ? 'var(--accent)' : 'var(--border)' }}
+        onClick={() => onChange(p)}>
+        {p}</button>
+      )}
+
+      {range[range.length - 1] < totalPages &&
+      <>
+          {range[range.length - 1] < totalPages - 1 && <span style={{ color: 'var(--text-muted)', padding: '0 4px' }}>…</span>}
+          <button style={btnBase} onClick={() => onChange(totalPages)}>{totalPages}</button>
+        </>
+      }
+
+      <button
+        style={{ ...btnBase, opacity: page >= totalPages ? 0.4 : 1 }}
+        disabled={page >= totalPages}
+        onClick={() => onChange(page + 1)}>
+        
+        <ChevronRightIcon size={15} />
+      </button>
+    </div>);
+
+}
+
+/* ============================================================
+   ERROR STATE
+   ============================================================ */
+function ErrorState({ message, onRetry }) {
+  return (
+    <div className="fade-in" style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      gap: 12, padding: '48px 24px',
+      background: 'var(--danger-surface)', border: '1px solid oklch(0.85 0.04 25)',
+      borderRadius: 'var(--radius-lg)', color: 'var(--danger)'
+    }}>
+      <AlertIcon size={28} />
+      <p style={{ fontWeight: 600, fontSize: 14, textAlign: 'center' }}>{message}</p>
+      {onRetry &&
+      <button
+        onClick={onRetry}
+        style={{
+          padding: '8px 18px', border: 'none', borderRadius: 'var(--radius-sm)',
+          background: 'var(--danger)', color: '#fff', cursor: 'pointer',
+          fontSize: 13, fontWeight: 600, fontFamily: 'var(--font)'
+        }}>
+        再試行</button>
+      }
+    </div>);
+
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+function EmptyState({ query }) {
+  return (
+    <div className="fade-in" style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      gap: 10, padding: '56px 24px', color: 'var(--text-muted)', textAlign: 'center'
+    }}>
+      <SearchIcon size={36} color="var(--border)" />
+      <p style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>「{query}」に一致するリポジトリが見つかりませんでした</p>
+      <p style={{ fontSize: 12 }}>別のキーワードで検索してみてください</p>
+    </div>);
+
+}
+
+/* ============================================================
+   SEARCH PAGE — pages layer
+   ============================================================ */
+function SearchPage({ urlState, onNavigate }) {
+  const [inputValue, setInputValue] = useState(urlState.q);
+  const [validationError, setValidationError] = useState('');
+  const [results, setResults] = useState(null); // { total_count, items }
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+
+  // Derived
+  const totalPages = results ? Math.min(Math.ceil(results.total_count / PER_PAGE), 20) : 0;
+
+  // Execute search when URL params change
+  const doSearch = useCallback(async (q, sort, page) => {
+    const v = validateSearchQuery(q);
+    if (!v.ok) return;
+    setLoading(true);
+    setError('');
+    try {
+      const data = await githubApi.searchRepositories({ q: v.value, sort, page });
+      setResults(data);
+    } catch (e) {
+      setError(e.message);
+      setResults(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (urlState.q) {
+      setInputValue(urlState.q);
+      doSearch(urlState.q, urlState.sort, urlState.page);
+    }
+  }, [urlState.q, urlState.sort, urlState.page]);
+
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    const v = validateSearchQuery(inputValue);
+    if (!v.ok) {setValidationError(v.error);return;}
+    setValidationError('');
+    onNavigate({ q: v.value, sort: urlState.sort, page: 1, repo: '' });
+  };
+
+  const handleSortChange = (sort) => {
+    if (!urlState.q) return;
+    onNavigate({ q: urlState.q, sort, page: 1, repo: '' });
+  };
+
+  const handlePageChange = (page) => {
+    onNavigate({ q: urlState.q, sort: urlState.sort, page, repo: '' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleRepoClick = (repo) => {
+    onNavigate({ q: urlState.q, sort: urlState.sort, page: urlState.page, repo: repo.full_name });
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontSize: "2px" }}>
+      {/* Header */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px', height: 58, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <GitHubIcon size={22} />
+            <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: -0.3 }}>リポジトリ検索</span>
+          </div>
+          {/* Search form in header (compact) */}
+          <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <input
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => {setInputValue(e.target.value);if (validationError) setValidationError('');}}
+                placeholder="リポジトリ名を入力してください"
+                style={{
+                  width: '100%', height: 36, padding: '0 12px 0 36px',
+                  border: `1.5px solid ${validationError ? 'var(--danger)' : 'var(--border)'}`,
+                  borderRadius: 'var(--radius-sm)', fontSize: 13,
+                  background: 'var(--surface)', color: 'var(--text-primary)',
+                  fontFamily: 'var(--font)', outline: 'none', transition: 'border-color 0.15s'
+                }}
+                onFocus={(e) => {if (!validationError) e.target.style.borderColor = 'var(--accent)';}}
+                onBlur={(e) => {if (!validationError) e.target.style.borderColor = 'var(--border)';}} />
+              
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <SearchIcon size={14} color="var(--text-muted)" />
+              </span>
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !inputValue.trim()}
+              style={{
+                height: 36, padding: '0 16px', border: 'none', borderRadius: 'var(--radius-sm)',
+                background: (loading || !inputValue.trim()) ? 'var(--border)' : 'var(--accent)',
+                color: (loading || !inputValue.trim()) ? 'var(--text-muted)' : '#fff',
+                fontWeight: 600, fontSize: 13, cursor: (loading || !inputValue.trim()) ? 'not-allowed' : 'pointer',
+                fontFamily: 'var(--font)', transition: 'background 0.15s', whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {if (!loading && inputValue.trim()) e.currentTarget.style.background = 'var(--accent-hover)';}}
+              onMouseLeave={(e) => {if (!loading && inputValue.trim()) e.currentTarget.style.background = 'var(--accent)';}}>
+              
+              {loading ? '検索中…' : '検索'}
+            </button>
+          </form>
+        </div>
+        {validationError &&
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px 8px' }}>
+            <p style={{ fontSize: 12, color: 'var(--danger)' }}>{validationError}</p>
+          </div>
+        }
+      </header>
+
+      {/* Main */}
+      <main style={{ flex: 1, maxWidth: 760, width: '100%', margin: '0 auto', padding: '20px 20px 48px' }}>
+
+        {/* Hero search (only when no query) */}
+        {!urlState.q &&
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, padding: '80px 20px 40px', textAlign: 'center' }}>
+            <GitHubIcon size={48} color="var(--text-secondary)" />
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.5, marginBottom: 8 }}>GitHub リポジトリ検索</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>キーワードを入力して、GitHub 上のリポジトリを探しましょう</p>
+            </div>
+          </div>
+        }
+
+        {/* Results header */}
+        {results && !loading &&
+        <div className="fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+              約 <strong style={{ color: 'var(--text-primary)' }}>{results.total_count.toLocaleString('ja-JP')}</strong> 件のリポジトリが見つかりました
+              <span style={{ color: 'var(--text-muted)', marginLeft: 6, fontSize: 12 }}>（{urlState.page}/{totalPages} ページ）</span>
+            </p>
+            {/* Sort tabs */}
+            <div style={{ display: 'flex', gap: 4 }}>
+              {SORT_OPTIONS.map((opt) =>
+            <button
+              key={opt.value}
+              onClick={() => handleSortChange(opt.value)}
+              style={{
+                padding: '4px 10px', border: `1.5px solid ${urlState.sort === opt.value ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: 99, fontSize: 12, fontWeight: 500,
+                background: urlState.sort === opt.value ? 'var(--accent-surface)' : 'var(--surface)',
+                color: urlState.sort === opt.value ? 'var(--accent)' : 'var(--text-secondary)',
+                cursor: 'pointer', fontFamily: 'var(--font)', transition: 'all 0.15s'
+              }}>
+              {opt.label}</button>
+            )}
+            </div>
+          </div>
+        }
+
+        {/* Sort controls when loading (keep visible) */}
+        {loading && urlState.q &&
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <Skel w={240} h={18} />
+            <div style={{ display: 'flex', gap: 4 }}>
+              {SORT_OPTIONS.map((opt) =>
+            <button key={opt.value} style={{
+              padding: '4px 10px', border: `1.5px solid ${urlState.sort === opt.value ? 'var(--accent)' : 'var(--border)'}`,
+              borderRadius: 99, fontSize: 12, fontWeight: 500,
+              background: urlState.sort === opt.value ? 'var(--accent-surface)' : 'var(--surface)',
+              color: urlState.sort === opt.value ? 'var(--accent)' : 'var(--text-secondary)',
+              cursor: 'pointer', fontFamily: 'var(--font)', transition: 'all 0.15s',
+              opacity: 0.6
+            }}>{opt.label}</button>
+            )}
+            </div>
+          </div>
+        }
+
+        {/* Skeleton list */}
+        {loading &&
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Array.from({ length: 8 }).map((_, i) =>
+          <div key={i} style={{ animationDelay: `${i * 50}ms` }} className="fade-in">
+                <RepoCardSkeleton />
+              </div>
+          )}
+          </div>
+        }
+
+        {/* Error */}
+        {!loading && error &&
+        <ErrorState message={error} onRetry={() => doSearch(urlState.q, urlState.sort, urlState.page)} />
+        }
+
+        {/* Empty */}
+        {!loading && !error && results && results.items.length === 0 &&
+        <EmptyState query={urlState.q} />
+        }
+
+        {/* Repository list */}
+        {!loading && !error && results && results.items.length > 0 &&
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {results.items.map((repo, i) =>
+          <RepositoryCard key={repo.id} repo={repo} onClick={handleRepoClick} animDelay={i * 20} />
+          )}
+          </div>
+        }
+
+        {/* Pagination */}
+        {!loading && results && results.items.length > 0 &&
+        <div style={{ marginTop: 24 }}>
+            <Pagination page={urlState.page} totalPages={totalPages} onChange={handlePageChange} />
+          </div>
+        }
+      </main>
+    </div>);
+
+}
+
+/* ============================================================
+   DETAIL PAGE — pages layer
+   ============================================================ */
+function DetailPage({ repoFullName, urlState, onBack }) {
+  const [repo, setRepo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const [owner, name] = repoFullName.split('/');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await githubApi.getRepository(owner, name);
+      setRepo(data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [owner, name]);
+
+  useEffect(() => {load();}, [load]);
+
+  const StatCard = ({ label, value, icon }) =>
+  <div style={{
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+    padding: '16px 12px', background: 'var(--bg)', border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)', flex: '1 1 80px'
+  }}>
+      <span style={{ fontSize: 18 }}>{icon}</span>
+      <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.5, color: 'var(--text-primary)' }}>{fmt(value)}</span>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{label}</span>
+    </div>;
+
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px', height: 58, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '6px 12px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)',
+              background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer',
+              fontSize: 13, fontWeight: 500, fontFamily: 'var(--font)', transition: 'all 0.15s'
+            }}
+            onMouseEnter={(e) => {e.currentTarget.style.borderColor = 'var(--accent)';e.currentTarget.style.color = 'var(--accent)';}}
+            onMouseLeave={(e) => {e.currentTarget.style.borderColor = 'var(--border)';e.currentTarget.style.color = 'var(--text-secondary)';}}>
+            
+            <ChevronLeftIcon size={15} /> トップページへ戻る
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+            <GitHubIcon size={22} />
+            <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: -0.3 }}>リポジトリ検索</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main */}
+      <main style={{ flex: 1, maxWidth: 760, width: '100%', margin: '0 auto', padding: '24px 20px 64px' }}>
+
+        {/* Loading skeleton */}
+        {loading &&
+        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+              <div className="skeleton" style={{ width: 64, height: 64, borderRadius: 12, flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <Skel w="50%" h={20} />
+                <Skel w="30%" h={14} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[1, 2, 3, 4].map((i) =>
+            <div key={i} className="skeleton" style={{ flex: 1, height: 80, borderRadius: 'var(--radius)' }} />
+            )}
+            </div>
+            <div style={{ padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+              <Skel w="100%" h={14} />
+              <div style={{ marginTop: 8 }}><Skel w="85%" h={14} /></div>
+              <div style={{ marginTop: 8 }}><Skel w="70%" h={14} /></div>
+            </div>
+          </div>
+        }
+
+        {/* Error */}
+        {!loading && error && <ErrorState message={error} onRetry={load} />}
+
+        {/* Content */}
+        {!loading && !error && repo &&
+        <div className="slide-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* Hero card */}
+            <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
+            padding: '20px', background: 'var(--surface)',
+            border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+              <img
+              src={repo.owner.avatar_url}
+              alt={repo.owner.login}
+              style={{ width: 64, height: 64, borderRadius: 12, border: '1px solid var(--border)', objectFit: 'cover' }} />
+            
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                  <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.4 }}>{repo.full_name}</h1>
+                  {repo.private && <Badge>Private</Badge>}
+                  {repo.archived && <Badge>Archived</Badge>}
+                  {repo.fork && <Badge>Fork</Badge>}
+                </div>
+                {repo.language &&
+              <div style={{ marginBottom: 6 }}>
+                    <Badge color="blue">{repo.language}</Badge>
+                  </div>
+              }
+                {repo.description &&
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{repo.description}</p>
+              }
+              </div>
+              <a
+              href={repo.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                background: 'var(--surface)', color: 'var(--text-secondary)',
+                fontSize: 12, fontWeight: 600, fontFamily: 'var(--font)',
+                textDecoration: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'var(--accent)';e.currentTarget.style.color = '#fff';e.currentTarget.style.borderColor = 'var(--accent)';}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = 'var(--surface)';e.currentTarget.style.color = 'var(--text-secondary)';e.currentTarget.style.borderColor = 'var(--border)';}}>
+              
+                <ExternalLinkIcon size={13} /> GitHub で開く
+              </a>
+            </div>
+
+            {/* Stats */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <StatCard label="Star 数" value={repo.stargazers_count} icon="⭐" />
+              <StatCard label="Watcher 数" value={repo.watchers_count} icon="👁" />
+              <StatCard label="Fork 数" value={repo.forks_count} icon="🔀" />
+              <StatCard label="Issue 数" value={repo.open_issues_count} icon="🐛" />
+            </div>
+
+            {/* Meta */}
+            <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 0,
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden'
+          }}>
+              {[
+            { label: 'オーナー', value: repo.owner.login },
+            { label: 'デフォルトブランチ', value: repo.default_branch },
+            { label: '作成日', value: fmtDate(repo.created_at) },
+            { label: '最終更新日', value: fmtDate(repo.updated_at) },
+            repo.license && { label: 'ライセンス', value: repo.license.spdx_id },
+            { label: '可視性', value: repo.private ? 'Private' : 'Public' }].
+            filter(Boolean).map((item, i, arr) =>
+            <div
+              key={item.label}
+              style={{
+                padding: '12px 16px',
+                borderBottom: `1px solid var(--border)`,
+                borderRight: `1px solid var(--border)`
+              }}>
+              
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>{item.label}</p>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{item.value}</p>
+                </div>
+            )}
+            </div>
+
+            {/* Topics */}
+            {repo.topics && repo.topics.length > 0 &&
+          <div style={{
+            padding: '16px', background: 'var(--surface)',
+            border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)'
+          }}>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>トピック</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {repo.topics.map((t) => <Badge key={t} color="green">{t}</Badge>)}
+                </div>
+              </div>
+          }
+          </div>
+        }
+      </main>
+    </div>);
+
+}
+
+/* ============================================================
+   APP ROOT — app layer
+   ============================================================ */
+function App() {
+  const [urlState, pushState] = useUrlState();
+
+  if (urlState.repo) {
+    return <DetailPage repoFullName={urlState.repo} urlState={urlState} onBack={() => pushState({ q: urlState.q, sort: urlState.sort, page: urlState.page, repo: '' })} />;
+  }
+  return <SearchPage urlState={urlState} onNavigate={pushState} />;
+}
+
+/* ============================================================
+   ICON COMPONENTS (SVG, inline)
+   ============================================================ */
+function GitHubIcon({ size = 24, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+    </svg>);
+
+}
+function SearchIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+      <circle cx="8.5" cy="8.5" r="5.5" />
+      <line x1="13" y1="13" x2="18" y2="18" />
+    </svg>);
+
+}
+function ChevronRightIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6,3 11,8 6,13" />
+    </svg>);
+
+}
+function ChevronLeftIcon({ size = 16, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="10,3 5,8 10,13" />
+    </svg>);
+
+}
+function AlertIcon({ size = 24, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>);
+
+}
+function StarIcon({ size = 14, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
+      <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z" />
+    </svg>);
+
+}
+function ExternalLinkIcon({ size = 14, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9" />
+      <polyline points="10,1 14,1 14,5" />
+      <line x1="7" y1="9" x2="14" y2="1" />
+    </svg>);
+
+}
+
+/* Render */
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+
+
+</body></html>
