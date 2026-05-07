@@ -1,7 +1,13 @@
 allowBuilds:
   # Next.js の画像最適化に使用
-  sharp: true
   # MSW のブラウザ用 Service Worker 生成に使用
   msw: true
+  sharp: true
   # eslint-import-resolver-typescript の依存
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - postcss@8.5.10
+  - ip-address@10.1.1
+overrides:
+  ip-address@<=10.1.0: ^10.1.1
+  postcss@<8.5.10: ^8.5.10
