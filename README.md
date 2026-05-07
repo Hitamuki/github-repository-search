@@ -71,7 +71,7 @@ GitHub Search API を使ってリポジトリを検索・詳細表示する Web 
 
 ## システム構成図
 
-![システム構成図](assets/generated/システム構成図.svg)
+![システム構成図](assets/generated/システム構成図.png)
 
 ## URL 構成
 
