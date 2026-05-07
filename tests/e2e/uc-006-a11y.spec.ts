@@ -16,10 +16,12 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
   // 以下のキーボード/フォーカステストはデスクトップ環境でのみ実行する。
   // モバイル・タブレットにはハードウェアキーボードがないためスキップ。
 
-  test("uc-006-001: キーボードのみで検索が完結できる", async ({ page }, testInfo) => {
+  test("uc-006-001: キーボードのみで検索が完結できる", async ({
+    page,
+  }, testInfo) => {
     test.skip(
       KEYBOARD_SKIP_PROJECTS.includes(testInfo.project.name),
-      KEYBOARD_SKIP_REASON,
+      KEYBOARD_SKIP_REASON
     )
 
     // Arrange
@@ -31,7 +33,8 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
     const searchInput = page.getByPlaceholder(/リポジトリ名を入力してください/i)
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press("Tab")
-      if (await searchInput.evaluate((el) => document.activeElement === el)) break
+      if (await searchInput.evaluate((el) => document.activeElement === el))
+        break
     }
     await expect(searchInput).toBeFocused()
 
@@ -48,12 +51,12 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
     for (let i = 0; i < 15; i++) {
       await page.keyboard.press("Tab")
       const focusedTag = await page.evaluate(
-        () => document.activeElement?.tagName,
+        () => document.activeElement?.tagName
       )
       if (focusedTag === "A") break
     }
     const focusedTag = await page.evaluate(
-      () => document.activeElement?.tagName,
+      () => document.activeElement?.tagName
     )
     expect(focusedTag).toBe("A")
 
@@ -67,7 +70,7 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
   }, testInfo) => {
     test.skip(
       KEYBOARD_SKIP_PROJECTS.includes(testInfo.project.name),
-      KEYBOARD_SKIP_REASON,
+      KEYBOARD_SKIP_REASON
     )
 
     // Arrange
@@ -78,7 +81,8 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
     const searchInput = page.getByPlaceholder(/リポジトリ名を入力してください/i)
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press("Tab")
-      if (await searchInput.evaluate((el) => document.activeElement === el)) break
+      if (await searchInput.evaluate((el) => document.activeElement === el))
+        break
     }
     await expect(searchInput).toBeFocused()
 
@@ -98,7 +102,9 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
 
   // ── スクリーンリーダー ──────────────────────────────────────────────────
 
-  test("uc-006-003: ローディング中に aria-busy が付与される", async ({ page }) => {
+  test("uc-006-003: ローディング中に aria-busy が付与される", async ({
+    page,
+  }) => {
     // Arrange: ページ遷移を開始するが完全に読み込まれる前にスケルトンを確認
     const navigation = page.goto("/?q=react")
 
@@ -148,7 +154,9 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
 
   // ── レスポンシブ ────────────────────────────────────────────────────────
 
-  test("uc-006-006: モバイル幅 (375px) でレイアウトが崩れない", async ({ page }) => {
+  test("uc-006-006: モバイル幅 (375px) でレイアウトが崩れない", async ({
+    page,
+  }) => {
     // Arrange: ブラウザ幅を 375px に設定
     await page.setViewportSize({ width: 375, height: 667 })
 
@@ -158,7 +166,7 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
 
     // Assert: 検索フォームが正常に表示される
     await expect(
-      page.getByPlaceholder(/リポジトリ名を入力してください/i),
+      page.getByPlaceholder(/リポジトリ名を入力してください/i)
     ).toBeVisible()
 
     // Assert: リポジトリ一覧が正常に表示される
@@ -168,7 +176,7 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
     const hasHorizontalScroll = await page.evaluate(
       () =>
         document.documentElement.scrollWidth >
-        document.documentElement.clientWidth,
+        document.documentElement.clientWidth
     )
     expect(hasHorizontalScroll).toBeFalsy()
   })
@@ -185,14 +193,16 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
 
     // Assert: 検索フォームが正常に表示される
     await expect(
-      page.getByPlaceholder(/リポジトリ名を入力してください/i),
+      page.getByPlaceholder(/リポジトリ名を入力してください/i)
     ).toBeVisible()
 
     // Assert: リポジトリ一覧が最適なグリッドで表示される
     await expect(page.getByRole("listitem").first()).toBeVisible()
   })
 
-  test("uc-006-008: PC 幅 (1280px) でレイアウトが最適化される", async ({ page }) => {
+  test("uc-006-008: PC 幅 (1280px) でレイアウトが最適化される", async ({
+    page,
+  }) => {
     // Arrange: ブラウザ幅を 1280px に設定
     await page.setViewportSize({ width: 1280, height: 800 })
 
@@ -202,7 +212,7 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
 
     // Assert: 検索フォームが正常に表示される
     await expect(
-      page.getByPlaceholder(/リポジトリ名を入力してください/i),
+      page.getByPlaceholder(/リポジトリ名を入力してください/i)
     ).toBeVisible()
 
     // Assert: リポジトリ一覧が最適なグリッドで表示される
@@ -216,7 +226,7 @@ test.describe("Feature: アクセシビリティ・レスポンシブ (req-006-a
   }, testInfo) => {
     test.skip(
       KEYBOARD_SKIP_PROJECTS.includes(testInfo.project.name),
-      KEYBOARD_SKIP_REASON,
+      KEYBOARD_SKIP_REASON
     )
 
     // Arrange

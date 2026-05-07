@@ -4,8 +4,8 @@
  * @see req-001-search, req-002-results, req-004-pagination, req-007-sort, req-009-performance
  * @see uc-001-search, uc-002-results, uc-004-pagination, uc-007-sort
  */
-import { Suspense } from "react"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 
 import { SearchForm, searchParamsSchema } from "@/features/search-repositories"
 import { APP_NAME } from "@/shared/config/app"

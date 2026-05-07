@@ -3,8 +3,8 @@
  * @remarks
  * アクセシビリティテスト（axe-core）を全テストで自動実行するための共通フィクスチャ。
  */
-import { test as base } from "@playwright/test"
 import AxeBuilder from "@axe-core/playwright"
+import { test as base } from "@playwright/test"
 
 /**
  * 拡張テストフィクスチャ
@@ -28,6 +28,7 @@ export const test = base.extend<{
       new AxeBuilder({ page })
         // WCAG 2.1 Level AA を基準とする（req-006-a11y-responsive）
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(makeAxeBuilder)
   },
 })

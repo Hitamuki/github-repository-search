@@ -11,7 +11,10 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
     await page.goto("/")
   })
 
-  test("uc-001-001: キーワードで検索できる", async ({ page, makeAxeBuilder }) => {
+  test("uc-001-001: キーワードで検索できる", async ({
+    page,
+    makeAxeBuilder,
+  }) => {
     // Arrange
     const searchInput = page.getByPlaceholder(/リポジトリ名を入力してください/i)
     const searchButton = page.getByRole("button", { name: "検索", exact: true })
@@ -36,7 +39,7 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
 
     // アクセシビリティテスト（req-006-a11y-responsive）
     const accessibilityScanResults = await makeAxeBuilder().analyze()
-    
+
     // 色のコントラスト問題を確認するため、violations を出力
     if (accessibilityScanResults.violations.length > 0) {
       console.log("Accessibility violations found:")
@@ -50,7 +53,7 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
         })
       })
     }
-    
+
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
@@ -75,7 +78,9 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-001-003: URL の q パラメータで初期検索が実行される", async ({ page }) => {
+  test("uc-001-003: URL の q パラメータで初期検索が実行される", async ({
+    page,
+  }) => {
     // Act: ユーザーが "/?q=typescript" に直接アクセスする
     await page.goto("/?q=typescript")
 
@@ -87,7 +92,9 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-001-004: スペースを含むキーワードがエンコードされる", async ({ page }) => {
+  test("uc-001-004: スペースを含むキーワードがエンコードされる", async ({
+    page,
+  }) => {
     // Arrange
     const searchInput = page.getByPlaceholder(/リポジトリ名を入力してください/i)
     const searchButton = page.getByRole("button", { name: "検索", exact: true })
@@ -129,7 +136,7 @@ test.describe("Feature: リポジトリ検索 (req-001-search)", () => {
 
     // Assert: バリデーションエラー "検索キーワードは256文字以内で入力してください" が表示される
     await expect(
-      page.getByText(/検索キーワードは256文字以内で入力してください/),
+      page.getByText(/検索キーワードは256文字以内で入力してください/)
     ).toBeVisible()
 
     // Assert: URL は変更されない

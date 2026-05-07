@@ -30,9 +30,7 @@ export const searchQuerySchema = z.object({
 /** URL クエリパラメータのバリデーションスキーマ（req-004-001, req-007-001, req-007-007, req-004-011, req-004-014） */
 export const searchParamsSchema = z.object({
   q: z.string().trim().catch(""),
-  sort: z
-    .enum(["best match", "stars", "forks", "updated"])
-    .catch("best match"),
+  sort: z.enum(["best match", "stars", "forks", "updated"]).catch("best match"),
   page: z.coerce.number().int().min(1).max(MAX_PAGES).catch(1),
 })
 

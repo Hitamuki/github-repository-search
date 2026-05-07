@@ -56,7 +56,9 @@ test.describe("Feature: ページネーション (req-004-pagination)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-004-004: 検索クエリ変更時に page が 1 にリセットされる", async ({ page }) => {
+  test("uc-004-004: 検索クエリ変更時に page が 1 にリセットされる", async ({
+    page,
+  }) => {
     // Arrange: ユーザーが "/?q=react&page=3" にいる
     await page.goto("/?q=react&page=3")
     await expect(page.getByRole("list")).toBeVisible()
@@ -77,7 +79,9 @@ test.describe("Feature: ページネーション (req-004-pagination)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-004-005: page パラメータなしは 1 ページ目として扱われる", async ({ page }) => {
+  test("uc-004-005: page パラメータなしは 1 ページ目として扱われる", async ({
+    page,
+  }) => {
     // Act: ユーザーが "/?q=react" にアクセスする
     await page.goto("/?q=react")
 
@@ -137,13 +141,17 @@ test.describe("Feature: ページネーション (req-004-pagination)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-004-010: 総件数が1000件超のとき上限注記が表示される", async ({ page }) => {
+  test("uc-004-010: 総件数が1000件超のとき上限注記が表示される", async ({
+    page,
+  }) => {
     // Arrange: react は総件数が1000件を超える検索結果を返す
     await page.goto("/?q=react")
 
     // Assert: "GitHub API の制約により、表示できるのは上位1000件までです" という注記が表示される
     await expect(
-      page.getByText(/GitHub API の制約により、表示できるのは上位1000件までです/),
+      page.getByText(
+        /GitHub API の制約により、表示できるのは上位1000件までです/
+      )
     ).toBeVisible()
   })
 

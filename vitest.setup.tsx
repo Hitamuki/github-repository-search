@@ -11,6 +11,10 @@ import { vi, beforeAll, afterEach, afterAll } from "vitest"
 
 import { server } from "./tests/mocks/server"
 
+import type { ImageProps } from "next/image"
+import type { LinkProps } from "next/link"
+import type { ReactNode } from "react"
+
 // server-only モジュールのモック（req-008-007）
 vi.mock("server-only", () => ({}))
 
@@ -41,20 +45,23 @@ vi.mock("next/headers", () => ({
 
 vi.mock("next/image", () => ({
   __esModule: true,
-  default: vi.fn((props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} fill={undefined} alt={props.alt || ""} />
+  default: vi.fn((props: ImageProps) => {
+    // eslint-disable-next-line @next/next/no-img-element, @typescript-eslint/no-explicit-any
+    return <img {...(props as any)} fill={undefined} alt={props.alt || ""} />
   }),
 }))
 
 // Link のモック
 vi.mock("next/link", () => ({
   __esModule: true,
-  default: vi.fn(({ children, href, ...props }: any) => {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }),
+  default: vi.fn(
+    ({ children, href, ...props }: LinkProps & { children: ReactNode }) => {
+      return (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        <a href={href as string} {...(props as any)}>
+          {children}
+        </a>
+      )
+    }
+  ),
 }))

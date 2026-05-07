@@ -6,9 +6,7 @@
 import { test, expect } from "./fixtures"
 
 test.describe("Feature: リポジトリ詳細 (req-003-detail)", () => {
-  test("uc-003-001: リポジトリ詳細情報が表示される", async ({
-    page,
-  }) => {
+  test("uc-003-001: リポジトリ詳細情報が表示される", async ({ page }) => {
     // Act: ユーザーが "/repos/vercel/next.js" にアクセスする
     await page.goto("/repos/vercel/next.js")
 
@@ -42,14 +40,18 @@ test.describe("Feature: リポジトリ詳細 (req-003-detail)", () => {
     await expect(page.getByText("最終更新日")).toBeVisible()
 
     // Assert: "GitHubで見る" リンクが表示される
-    await expect(page.getByRole("link", { name: /GitHub で開く/i })).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: /GitHub で開く/i })
+    ).toBeVisible()
 
     // TODO: アクセシビリティテスト（req-006-a11y-responsive）
     // const accessibilityScanResults = await makeAxeBuilder().analyze()
     // expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("uc-003-002: 「GitHubで見る」リンクが新しいタブで開く", async ({ page }) => {
+  test("uc-003-002: 「GitHubで見る」リンクが新しいタブで開く", async ({
+    page,
+  }) => {
     // Arrange: ユーザーが "/repos/vercel/next.js" にアクセスしている
     await page.goto("/repos/vercel/next.js")
 
@@ -81,7 +83,9 @@ test.describe("Feature: リポジトリ詳細 (req-003-detail)", () => {
     await expect(page).toHaveURL(/\?q=next\.js/)
   })
 
-  test("uc-003-004: 詳細取得中にスケルトン UI が表示される", async ({ page }) => {
+  test("uc-003-004: 詳細取得中にスケルトン UI が表示される", async ({
+    page,
+  }) => {
     // Arrange: ページ遷移を開始するが、完全に読み込まれる前にスケルトンを確認
     const navigation = page.goto("/repos/vercel/next.js")
 
@@ -115,7 +119,9 @@ test.describe("Feature: リポジトリ詳細 (req-003-detail)", () => {
     await expect(page.getByText(/ライセンスなし/)).toBeVisible()
   })
 
-  test("uc-003-007: 存在しないリポジトリで 404 ページが表示される", async ({ page }) => {
+  test("uc-003-007: 存在しないリポジトリで 404 ページが表示される", async ({
+    page,
+  }) => {
     // Arrange: GitHub API が 404 レスポンスを返す
     await page.goto("/repos/nonexistent-owner/nonexistent-repo")
 
@@ -124,7 +130,7 @@ test.describe("Feature: リポジトリ詳細 (req-003-detail)", () => {
 
     // Assert: エラーメッセージが見出しとして表示される（<h2> 要素）
     await expect(
-      page.getByRole("heading", { name: /リポジトリが見つかりませんでした/ }),
+      page.getByRole("heading", { name: /リポジトリが見つかりませんでした/ })
     ).toBeVisible()
   })
 })

@@ -54,7 +54,9 @@ test.describe("Feature: オブザーバビリティ (req-010-observability)", ()
     expect(requestId).toMatch(UUID_V4_PATTERN)
   })
 
-  test("uc-010-004: リクエストごとに x-request-id が一意になる", async ({ page }) => {
+  test("uc-010-004: リクエストごとに x-request-id が一意になる", async ({
+    page,
+  }) => {
     // Act: ユーザーが "/" に連続して 2 回アクセスする
     const response1 = await page.goto("/")
     const id1 = response1?.headers()["x-request-id"]

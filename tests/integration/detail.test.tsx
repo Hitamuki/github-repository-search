@@ -23,12 +23,12 @@ describe("リポジトリ詳細 結合テスト", () => {
     await waitFor(() => {
       expect(screen.getByText("facebook/react")).toBeInTheDocument()
     })
-    
+
     // 統計情報の確認
     expect(screen.getByText(/220.0k/)).toBeInTheDocument() // Star 数
-    expect(screen.getByText(/15.0k/)).toBeInTheDocument()  // Watcher 数
-    expect(screen.getByText(/45.0k/)).toBeInTheDocument()  // Fork 数
-    
+    expect(screen.getByText(/15.0k/)).toBeInTheDocument() // Watcher 数
+    expect(screen.getByText(/45.0k/)).toBeInTheDocument() // Fork 数
+
     // メタ情報の確認
     expect(screen.getByText("MIT")).toBeInTheDocument() // ライセンス
     expect(screen.getByText("JavaScript")).toBeInTheDocument() // 言語
@@ -39,13 +39,20 @@ describe("リポジトリ詳細 結合テスト", () => {
     render(
       await RepoPage({
         params: Promise.resolve({ owner: "facebook", repo: "react" }),
-        searchParams: Promise.resolve({ q: "react hooks", sort: "stars", page: "2" }),
+        searchParams: Promise.resolve({
+          q: "react hooks",
+          sort: "stars",
+          page: "2",
+        }),
       })
     )
 
     // Assert
     const backLink = screen.getByRole("link", { name: /検索結果に戻る/i })
-    expect(backLink).toHaveAttribute("href", "/?q=react+hooks&sort=stars&page=2")
+    expect(backLink).toHaveAttribute(
+      "href",
+      "/?q=react+hooks&sort=stars&page=2"
+    )
   })
 
   test("uc-003-006: 存在しないリポジトリの場合は notFound が呼ばれる", async () => {
@@ -60,7 +67,7 @@ describe("リポジトリ詳細 結合テスト", () => {
         params: Promise.resolve({ owner: "not-found", repo: "repo" }),
         searchParams: Promise.resolve({}),
       })
-    } catch (e) {
+    } catch {
       // notFound は内部でエラーを投げるのでキャッチする
     }
 

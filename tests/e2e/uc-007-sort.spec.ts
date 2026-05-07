@@ -53,7 +53,9 @@ test.describe("Feature: 検索結果のソート (req-007-sort)", () => {
     await expect(page).toHaveURL(/sort=updated/)
   })
 
-  test("uc-007-005: ソート変更時に page が 1 にリセットされる", async ({ page }) => {
+  test("uc-007-005: ソート変更時に page が 1 にリセットされる", async ({
+    page,
+  }) => {
     // Arrange: ユーザーが "/?q=react&page=3" にいる
     await page.goto("/?q=react&page=3")
     await expect(page.getByRole("list")).toBeVisible()

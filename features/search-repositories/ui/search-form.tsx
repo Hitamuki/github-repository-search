@@ -42,7 +42,9 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
   const prevPendingRef = useRef(false)
   useEffect(() => {
     if (prevPendingRef.current && !isPending) {
-      const list = document.querySelector<HTMLElement>('[aria-label="検索結果"]')
+      const list = document.querySelector<HTMLElement>(
+        '[aria-label="検索結果"]'
+      )
       list?.focus()
     }
     prevPendingRef.current = isPending

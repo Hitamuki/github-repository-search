@@ -84,7 +84,11 @@ export async function RepositoryList({ q, sort, page }: RepositoryListProps) {
       />
 
       {/* tabIndex={-1}: プログラム的フォーカスを受け取れるようにする（uc-006-009） */}
-      <ul tabIndex={-1} className="space-y-2 outline-none" aria-label={LBL["LBL-005"]}>
+      <ul
+        tabIndex={-1}
+        className="space-y-2 outline-none"
+        aria-label={LBL["LBL-005"]}
+      >
         {data.items.map((repo) => (
           <li key={repo.id}>
             <RepositoryCard repo={repo} searchParams={searchParamsObj} />

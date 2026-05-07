@@ -5,14 +5,18 @@ import { http, HttpResponse } from "msw"
 
 import { GITHUB_API_BASE } from "@/shared/config/github"
 
-import type { SearchRepositoriesResponse, Repository } from "@/entities/repository"
+import type {
+  SearchRepositoriesResponse,
+  Repository,
+} from "@/entities/repository"
 
 // モック用のサンプルデータ
 const mockRepo: Repository = {
   id: 1,
   full_name: "facebook/react",
   name: "react",
-  description: "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
+  description:
+    "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
   html_url: "https://github.com/facebook/react",
   stargazers_count: 220000,
   watchers_count: 220000,

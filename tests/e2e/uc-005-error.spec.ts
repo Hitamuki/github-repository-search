@@ -21,7 +21,9 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
 
     // Assert: レート制限メッセージが表示される
     await expect(
-      page.getByText(/API レート制限に達しました。しばらく待ってから再試行してください。/),
+      page.getByText(
+        /API レート制限に達しました。しばらく待ってから再試行してください。/
+      )
     ).toBeVisible()
 
     // Assert: スタックトレースは表示されない
@@ -52,7 +54,7 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
 
     // Assert: バリデーションエラーメッセージが表示される
     await expect(
-      page.getByText(/検索クエリが無効です。別のキーワードをお試しください。/),
+      page.getByText(/検索クエリが無効です。別のキーワードをお試しください。/)
     ).toBeVisible()
   })
 
@@ -71,7 +73,9 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
 
     // Assert: エラーメッセージが表示される
     await expect(
-      page.getByText(/ネットワークエラーが発生しました。接続を確認してください。/),
+      page.getByText(
+        /ネットワークエラーが発生しました。接続を確認してください。/
+      )
     ).toBeVisible()
 
     // Cleanup
@@ -88,7 +92,9 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
     await page.goto("/?q=error")
 
     // Assert: 汎用エラーメッセージが表示される
-    await expect(page.getByText(/予期しないエラーが発生しました。/)).toBeVisible()
+    await expect(
+      page.getByText(/予期しないエラーが発生しました。/)
+    ).toBeVisible()
 
     // Assert: スタックトレースは表示されない
     await expect(page.getByText(/stack trace|エラー詳細/i)).not.toBeVisible()
@@ -105,7 +111,7 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
 
     // Assert: 上限メッセージが表示される
     await expect(
-      page.getByText(/表示できるのは上位1000件（20ページ）までです。/),
+      page.getByText(/表示できるのは上位1000件（20ページ）までです。/)
     ).toBeVisible()
   })
 
@@ -120,7 +126,7 @@ test.describe("Feature: エラーハンドリング (req-005-error)", () => {
 
     // Assert: "ページが見つかりませんでした" というメッセージが表示される（<h1> 要素）
     await expect(
-      page.getByRole("heading", { name: /ページが見つかりませんでした/ }),
+      page.getByRole("heading", { name: /ページが見つかりませんでした/ })
     ).toBeVisible()
 
     // Assert: トップページへ戻るリンクが表示される

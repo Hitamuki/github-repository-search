@@ -36,7 +36,9 @@ test.describe("Feature: 検索結果一覧 (req-002-results)", () => {
     await expect(page.getByText(/件のリポジトリが見つかりました/)).toBeVisible()
   })
 
-  test("uc-002-003: リポジトリカードクリックで詳細へ遷移する", async ({ page }) => {
+  test("uc-002-003: リポジトリカードクリックで詳細へ遷移する", async ({
+    page,
+  }) => {
     // Arrange: ユーザーが "/?q=next.js" にアクセスし結果が表示されている
     await page.goto("/?q=next.js")
     await expect(page.getByRole("list")).toBeVisible()
@@ -57,9 +59,11 @@ test.describe("Feature: 検索結果一覧 (req-002-results)", () => {
     // Assert: スケルトン UI またはリポジトリ一覧が表示される（ISR キャッシュ時はスケルトンが瞬時に消える）
     // locator.or() の strict モード問題を避けるため CSS セレクタで OR マッチングする
     await expect(
-      page.locator(
-        '[data-testid="repository-list-skeleton"], [aria-label="検索結果"]',
-      ).first(),
+      page
+        .locator(
+          '[data-testid="repository-list-skeleton"], [aria-label="検索結果"]'
+        )
+        .first()
     ).toBeVisible()
 
     // Act: レスポンス受信を待つ
@@ -69,30 +73,38 @@ test.describe("Feature: 検索結果一覧 (req-002-results)", () => {
     await expect(page.getByRole("list")).toBeVisible()
   })
 
-  test("uc-002-005: 検索結果が0件のとき空メッセージが表示される", async ({ page }) => {
+  test("uc-002-005: 検索結果が0件のとき空メッセージが表示される", async ({
+    page,
+  }) => {
     // Arrange: 存在しないキーワードで検索する
     await page.goto("/?q=xxxxxxxxnotfoundxxxxxxxxx")
 
     // Assert: "「...」に一致するリポジトリが見つかりませんでした" というメッセージが表示される
     await expect(
-      page.getByText(/に一致するリポジトリが見つかりませんでした/),
+      page.getByText(/に一致するリポジトリが見つかりませんでした/)
     ).toBeVisible()
 
     // Assert: リポジトリカードは表示されない
     await expect(page.getByRole("list")).not.toBeVisible()
   })
 
-  test("uc-002-006: q パラメータなしではフォームのみ表示される", async ({ page }) => {
+  test("uc-002-006: q パラメータなしではフォームのみ表示される", async ({
+    page,
+  }) => {
     // Act: ユーザーが "/" にアクセスする
     await page.goto("/")
 
     // Assert: 検索フォームが表示される
-    await expect(page.getByPlaceholder(/リポジトリ名を入力してください/i)).toBeVisible()
+    await expect(
+      page.getByPlaceholder(/リポジトリ名を入力してください/i)
+    ).toBeVisible()
 
     // Assert: リポジトリ一覧は表示されない
     await expect(page.getByRole("list")).not.toBeVisible()
 
     // Assert: 総件数表示は表示されない
-    await expect(page.getByText(/件のリポジトリが見つかりました/)).not.toBeVisible()
+    await expect(
+      page.getByText(/件のリポジトリが見つかりました/)
+    ).not.toBeVisible()
   })
 })
