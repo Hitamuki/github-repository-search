@@ -1,0 +1,80 @@
+# ZAP Automation Framework プラン
+# @see req-008-001 〜 req-008-006 (セキュリティヘッダー検証)
+# ドキュメント: https://www.zaproxy.org/docs/automate/automation-framework/
+
+---
+env:
+  contexts:
+    - name: github-repository-search
+      urls:
+        - https://github-repository-search-cyan.vercel.app/
+      includePaths:
+        - "https://github-repository-search-cyan.vercel.app/.*"
+      excludePaths:
+        # Next.js の静的チャンク JS/CSS はスキャン対象外（ノイズ削減）
+        - "https://github-repository-search-cyan.vercel.app/_next/.*"
+        - "https://github-repository-search-cyan.vercel.app/favicon.ico"
+  parameters:
+    failOnError: true
+    # 終了コードの制御は run.sh 側で行うため ZAP 内部の警告判定はオフ
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # ─── フェーズ 1: Spider（従来型 HTML クロール）──────────────────────────────
+  # SSR ページのリンクを静的に収集する
+  - type: spider
+    parameters:
+      context: github-repository-search
+      url: https://github-repository-search-cyan.vercel.app/
+      maxDepth: 5
+      # SSR アプリなので 5 分で十分
+      maxDuration: 5
+      # Vercel レート制限を考慮して低めに設定
+      maxChildren: 10
+
+  # ─── フェーズ 2: AJAX Spider（JS 実行後のリンク収集）──────────────────────
+  # React ハイドレーション後に生成されるリンクを収集する
+  - type: spiderAjax
+    parameters:
+      context: github-repository-search
+      url: https://github-repository-search-cyan.vercel.app/
+      # 過度なクロールを防ぐ
+      maxDuration: 2
+      # ZAP stable イメージに同梱済みのヘッドレスブラウザ
+      browserId: htmlunit
+      eventWait: 1000
+
+  # ─── フェーズ 3: Passive Scan（受動スキャン）──────────────────────────────
+  # Spider/AJAX Spider で収集したトラフィックを分析する（攻撃リクエストなし）
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ─── フェーズ 4: Active Scan（能動スキャン）───────────────────────────────
+  # 実際に攻撃リクエストを送信して脆弱性を検出する
+  - type: activeScan
+    parameters:
+      context: github-repository-search
+      url: https://github-repository-search-cyan.vercel.app/
+      policy: Default Policy
+      # Vercel レート制限・GitHub API クォータ保護
+      threadPerHost: 2
+      delayInMs: 500
+
+  # ─── フェーズ 5: レポート生成 ─────────────────────────────────────────────
+  # HTML レポート（人間が読みやすい形式）
+  - type: report
+    parameters:
+      template: traditional-html
+      reportFile: /zap/work/reports/zap-report.html
+      reportTitle: "GitHub リポジトリ検索 セキュリティスキャンレポート"
+      reportDescription: "OWASP ZAP Full Scan - req-008-security 対応"
+
+  # JSON レポート（CI/CD での自動処理・アーカイブ用）
+  - type: report
+    parameters:
+      template: traditional-json
+      reportFile: /zap/work/reports/zap-report.json
+      reportTitle: "GitHub リポジトリ検索 セキュリティスキャンレポート"
+      reportDescription: "OWASP ZAP Full Scan - req-008-security 対応"

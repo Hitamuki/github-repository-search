@@ -1,0 +1,21 @@
+# ZAP セキュリティスキャン Docker Compose 設定
+# @see req-008-001 〜 req-008-006 (セキュリティヘッダー検証)
+# 使用方法: pnpm test:security
+
+services:
+  zap:
+    # 公式現行イメージ（旧 owasp/zap2docker-stable は非推奨）
+    image: ghcr.io/zaproxy/zaproxy:stable
+    working_dir: /zap/work
+    # ZAP Automation Framework でプランを実行
+    command: zap.sh -cmd -autorun /zap/work/zap-automation-plan.yml
+    volumes:
+      # プランファイル（読み取り専用）
+      - ./zap-automation-plan.yml:/zap/work/zap-automation-plan.yml:ro
+      # レポート出力ディレクトリ（書き込み可能）
+      - ./reports:/zap/work/reports
+    environment:
+      # OOM 対策のメモリ上限
+      - JAVA_OPTS=-Xmx512m
+    # コンテナ停止時の猶予時間
+    stop_grace_period: 30s

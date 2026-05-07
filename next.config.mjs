@@ -5,6 +5,8 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // X-Powered-By: Next.js ヘッダーを無効化（フレームワーク情報の漏洩防止）
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {

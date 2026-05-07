@@ -43,3 +43,7 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# OWASP ZAP セキュリティスキャン結果（生成物）
+/tests/security/reports/*.html
+/tests/security/reports/*.json
