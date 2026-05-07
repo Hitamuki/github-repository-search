@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Performance Lighthouse レポート（生成物）
 /tests/performance/reports/*.html
+
+# axe-core レポート（生成物）
+/tests/accessibility/reports

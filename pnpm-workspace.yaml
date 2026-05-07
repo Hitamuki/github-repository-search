@@ -1,6 +1,7 @@
 allowBuilds:
   # Next.js の画像最適化に使用
   # MSW のブラウザ用 Service Worker 生成に使用
+  chromedriver: false
   msw: true
   sharp: true
   # eslint-import-resolver-typescript の依存
