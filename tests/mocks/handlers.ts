@@ -20,6 +20,7 @@ const mockRepo: Repository = {
   html_url: "https://github.com/facebook/react",
   stargazers_count: 220000,
   watchers_count: 220000,
+  subscribers_count: 15000,
   forks_count: 45000,
   open_issues_count: 1500,
   language: "JavaScript",
@@ -91,7 +92,8 @@ export const handlers = [
       full_name: `${owner}/${repo}`,
       name: repo as string,
       stargazers_count: 220000,
-      watchers_count: 15000,
+      watchers_count: 220000,
+      subscribers_count: 15000,
       forks_count: 45000,
       owner: {
         ...mockRepo.owner,

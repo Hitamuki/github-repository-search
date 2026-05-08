@@ -65,7 +65,7 @@ export default async function RepoPage({
 
   const stats = [
     { label: "Star 数", value: repoData.stargazers_count, icon: Star },
-    { label: "Watcher 数", value: repoData.watchers_count, icon: Eye },
+    { label: "Watcher 数", value: repoData.subscribers_count, icon: Eye },
     { label: "Fork 数", value: repoData.forks_count, icon: GitFork },
     { label: "Issue 数", value: repoData.open_issues_count, icon: AlertCircle },
   ]
