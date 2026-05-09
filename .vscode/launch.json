@@ -9,6 +9,11 @@
       "skipFiles": [
         "${workspaceFolder}/node_modules/**",
         "<node_internals>/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!${workspaceFolder}/.next/**",
+        "!**/node_modules/**"
       ]
     },
     {

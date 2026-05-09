@@ -24,7 +24,6 @@
     "test:accessibility": "axe https://github-repository-search-cyan.vercel.app/ --dir ./tests/accessibility/reports",
     "doctor": "react-doctor --verbose",
     "audit": "pnpm audit",
-    "dev:log": "next dev --turbopack 2>&1 | pino-pretty",
     "dev:mobile": "next dev --turbopack --hostname 0.0.0.0"
   },
   "dependencies": {

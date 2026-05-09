@@ -3,6 +3,8 @@
  * @remarks セキュリティヘッダー・画像ドメイン許可・外部パッケージ設定
  */
 
+const isDev = process.env.NODE_ENV === "development"
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // X-Powered-By: Next.js ヘッダーを無効化（フレームワーク情報の漏洩防止）
@@ -27,7 +29,8 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // Next.js のハイドレーション・インラインスクリプトに必要
-              "script-src 'self' 'unsafe-inline'",
+              // 開発時は React が eval() を使用するため unsafe-eval を許可
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
               // Tailwind CSS / Next.js のインラインスタイルに必要
               "style-src 'self' 'unsafe-inline'",
               // GitHub アバター画像

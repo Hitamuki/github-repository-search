@@ -12,11 +12,22 @@ import pino from "pino"
  * アプリケーション全体で使用するロガーインスタンス
  * @remarks
  * - LOG_LEVEL 環境変数でログレベルを制御（デフォルト: "info"）
- * - 開発時は `pnpm dev 2>&1 | pino-pretty` でターミナルに整形出力
  */
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? "info",
   base: { service: "github-repository-search" },
+  ...(process.env.NODE_ENV === "development" && {
+    transport: {
+      target: "pino-pretty",
+      options: {
+        colorize: true,
+        translateTime: "SYS:HH:MM:ss",
+        ignore: "pid,hostname,service",
+        messageFormat: "{msg}",
+        singleLine: true,
+      },
+    },
+  }),
 })
 
 /**

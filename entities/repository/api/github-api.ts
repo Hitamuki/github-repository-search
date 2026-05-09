@@ -95,7 +95,9 @@ export async function searchRepositories(params: {
       throw new GitHubApiError(MSG_TPL["MSG-203"](res.status), res.status)
     }
 
-    return (await res.json()) as SearchRepositoriesResponse
+    const data = (await res.json()) as SearchRepositoriesResponse
+    log.info({ url, status: res.status, totalCount: data.total_count }, "リポジトリ検索成功")
+    return data
   } catch (error) {
     throw error
   }
@@ -129,5 +131,7 @@ export async function getRepository(
     throw new GitHubApiError(MSG_TPL["MSG-204"](res.status), res.status)
   }
 
-  return res.json() as Promise<Repository>
+  const data = (await res.json()) as Repository
+  log.info({ url, status: res.status, repo: `${owner}/${repo}` }, "リポジトリ詳細取得成功")
+  return data
 }
