@@ -1,6 +1,7 @@
 /**
  * @file ルートレイアウト
  * @remarks アプリケーション全体に適用されるレイアウト。
+ * @see req-006-001, req-006-002
  */
 import { Noto_Sans_JP } from "next/font/google"
 

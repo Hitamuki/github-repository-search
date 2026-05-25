@@ -180,7 +180,9 @@ Feature: リポジトリ検索 (req-001-search)
 
 ### 6.1 JSDoc コメント（必須）
 
-**すべての `.ts` / `.tsx`** に JSDoc を記述する。
+**すべての `.ts` / `.tsx`** に JSDoc を記述する。ただし **`shared/ui/` は shadcn/ui の自動生成ファイルのため、手動での JSDoc 付与は不要**。
+
+#### ファイルレベル
 
 ```typescript
 /**
@@ -189,7 +191,13 @@ Feature: リポジトリ検索 (req-001-search)
  * @see uc-001-001, uc-005-001                              ← 対応するシナリオ ID
  * @see {@link https://github.com/[owner]/[repo]/discussions} ADR カテゴリ
  */
+```
 
+#### 関数・コンポーネントレベル
+
+関数・コンポーネント・クラスなど **まとまりのある単位には必ず description（第一行の説明文）を書く**。単純な getter や自明な one-liner は省略可。
+
+```typescript
 /**
  * リポジトリを検索する
  * @param params.query - 検索キーワード（1〜256文字）

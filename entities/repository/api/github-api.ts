@@ -15,6 +15,11 @@ import {
 import { MSG, MSG_TPL } from "@/shared/config/messages"
 import { createRequestLogger } from "@/shared/lib/logger"
 
+import {
+  RepositorySchema,
+  SearchRepositoriesResponseSchema,
+} from "../model/schema"
+
 import type {
   SearchRepositoriesResponse,
   Repository,
@@ -49,6 +54,9 @@ export function buildRepoUrl(owner: string, repo: string): string {
   return `${GITHUB_API_BASE}/repos/${owner}/${repo}`
 }
 
+/**
+ * GitHub API から返されたエラーを表す例外クラス
+ */
 export class GitHubApiError extends Error {
   constructor(
     message: string,
@@ -95,8 +103,11 @@ export async function searchRepositories(params: {
       throw new GitHubApiError(MSG_TPL["MSG-203"](res.status), res.status)
     }
 
-    const data = (await res.json()) as SearchRepositoriesResponse
-    log.info({ url, status: res.status, totalCount: data.total_count }, "リポジトリ検索成功")
+    const data = SearchRepositoriesResponseSchema.parse(await res.json())
+    log.info(
+      { url, status: res.status, totalCount: data.total_count },
+      "リポジトリ検索成功"
+    )
     return data
   } catch (error) {
     throw error
@@ -131,7 +142,10 @@ export async function getRepository(
     throw new GitHubApiError(MSG_TPL["MSG-204"](res.status), res.status)
   }
 
-  const data = (await res.json()) as Repository
-  log.info({ url, status: res.status, repo: `${owner}/${repo}` }, "リポジトリ詳細取得成功")
+  const data = RepositorySchema.parse(await res.json())
+  log.info(
+    { url, status: res.status, repo: `${owner}/${repo}` },
+    "リポジトリ詳細取得成功"
+  )
   return data
 }

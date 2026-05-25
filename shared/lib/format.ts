@@ -1,5 +1,6 @@
 /**
  * @file 数値・日付フォーマットユーティリティ
+ * @see req-002-002, req-002-003
  */
 import { isNil } from "es-toolkit"
 

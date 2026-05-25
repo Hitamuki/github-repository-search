@@ -1,44 +1,19 @@
 /**
  * @file GitHub Repository エンティティの型定義
+ * @remarks 型は Zod スキーマから推論する
  */
+import type {
+  RepositoryOwnerSchema,
+  RepositorySchema,
+  SearchRepositoriesResponseSchema,
+} from "./schema"
+import type { z } from "zod"
 
-/** GitHub Search API レスポンスのリポジトリ型 */
-export interface Repository {
-  id: number
-  full_name: string
-  name: string
-  description: string | null
-  html_url: string
-  stargazers_count: number
-  watchers_count: number
-  subscribers_count: number
-  forks_count: number
-  open_issues_count: number
-  language: string | null
-  topics: string[]
-  private: boolean
-  archived: boolean
-  fork: boolean
-  default_branch: string
-  license: { spdx_id: string; name: string } | null
-  created_at: string
-  updated_at: string
-  pushed_at: string
-  owner: RepositoryOwner
-}
-
-export interface RepositoryOwner {
-  login: string
-  avatar_url: string
-  html_url: string
-}
-
-/** GitHub Search Repositories API レスポンス */
-export interface SearchRepositoriesResponse {
-  total_count: number
-  incomplete_results: boolean
-  items: Repository[]
-}
+export type RepositoryOwner = z.infer<typeof RepositoryOwnerSchema>
+export type Repository = z.infer<typeof RepositorySchema>
+export type SearchRepositoriesResponse = z.infer<
+  typeof SearchRepositoriesResponseSchema
+>
 
 /** ソートオプション */
 export type SortOption = "best match" | "stars" | "forks" | "updated"

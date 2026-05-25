@@ -1,6 +1,7 @@
 /**
  * @file サーバーサイドロガー
  * @remarks pino による構造化ロギング。Server Component / API 専用。
+ * @see req-010-001, req-010-002, req-010-005, req-010-006, req-010-007
  * @see {@link https://github.com/pinojs/pino} pino
  */
 import "server-only"

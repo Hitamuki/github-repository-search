@@ -90,9 +90,11 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
             aria-label={LBL["LBL-001"]}
             className={cn(
               "pl-9",
-              errors.q && "border-destructive focus-visible:ring-destructive"
+              errors.q &&
+                qValue?.trim() &&
+                "border-destructive focus-visible:ring-destructive"
             )}
-            aria-invalid={!!errors.q} // req-006-001, req-006-003
+            aria-invalid={!!(errors.q && qValue?.trim())} // req-006-001, req-006-003
             aria-describedby={errors.q ? "search-error" : undefined}
           />
         </div>
@@ -111,7 +113,7 @@ export function SearchForm({ defaultValue = "", className }: SearchFormProps) {
           )}
         </Button>
       </div>
-      {errors.q && (
+      {errors.q && qValue?.trim() && (
         // req-006-001 — スクリーンリーダーへエラーを即座に通知
         <p id="search-error" className="text-xs text-destructive" role="alert">
           {errors.q.message}

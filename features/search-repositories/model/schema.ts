@@ -11,6 +11,7 @@ import { MSG } from "@/shared/config/messages"
 
 import type { SortOption } from "@/entities/repository"
 
+/** ソートセレクターで選択可能なオプション一覧 */
 export const SORT_OPTIONS = [
   { value: "best match" as SortOption, label: "関連度" },
   { value: "stars" as SortOption, label: "Star数" },

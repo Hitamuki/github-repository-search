@@ -2,6 +2,8 @@
 /**
  * @file グローバルエラーバウンダリ（Client Component）
  * @remarks app/layout.tsx 直下で発生した予期しないエラーをキャッチする
+ * @see req-005-003, req-005-009
+ * @see uc-005-001
  */
 import Link from "next/link"
 import { useEffect } from "react"
